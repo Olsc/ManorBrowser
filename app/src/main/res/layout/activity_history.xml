@@ -6,17 +6,17 @@
     android:orientation="vertical"
     android:background="@color/background_main">
 
-    <TextView
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_history"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/title_history"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@color/text_primary"
-        android:fontFamily="sans-serif-black"
-        android:paddingHorizontal="24dp"
-        android:paddingTop="32dp"
-        android:paddingBottom="16dp" />
+        android:minHeight="?attr/actionBarSize"
+        android:background="@color/background_surface"
+        android:elevation="4dp"
+        app:title="@string/title_history"
+        app:titleTextColor="@color/text_primary"
+        app:navigationIcon="@drawable/ic_back"
+        app:navigationIconTint="@color/icon_main" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -55,4 +55,3 @@
         android:layout_margin="16dp" />
 
 </LinearLayout>
-

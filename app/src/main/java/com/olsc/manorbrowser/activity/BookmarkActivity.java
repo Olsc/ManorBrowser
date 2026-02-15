@@ -3,6 +3,7 @@ package com.olsc.manorbrowser.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -10,6 +11,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.core.graphics.Insets;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.olsc.manorbrowser.Config;
@@ -36,6 +42,16 @@ public class BookmarkActivity extends AppCompatActivity {
         androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(isDarkMode ? 
             androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES : androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
 
+        // Enable edge-to-edge
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        
+        // Set status bar and navigation bar icon colors
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(!isDarkMode);
+            controller.setAppearanceLightNavigationBars(!isDarkMode);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
 
@@ -44,6 +60,15 @@ public class BookmarkActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        // Handle window insets
+        View mainView = findViewById(android.R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            toolbar.setPadding(toolbar.getPaddingLeft(), insets.top, toolbar.getPaddingRight(), 0);
+            v.setPadding(v.getPaddingLeft(), 0, v.getPaddingRight(), insets.bottom);
+            return windowInsets;
+        });
 
         recyclerView = findViewById(R.id.rv_bookmarks);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

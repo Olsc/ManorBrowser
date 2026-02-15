@@ -8,7 +8,7 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/tab_card_view"
-        android:layout_width="280dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:layout_marginTop="32dp"

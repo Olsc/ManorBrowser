@@ -25,7 +25,12 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
 
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.google.android.material.navigation.NavigationView;
 
 import org.mozilla.geckoview.GeckoRuntime;
@@ -64,6 +69,16 @@ public class MainActivity extends AppCompatActivity {
         boolean isDarkMode = prefs.getBoolean(Config.PREF_KEY_DARK_MODE, false);
         AppCompatDelegate.setDefaultNightMode(isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
 
+        // Enable edge-to-edge
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        
+        // Set status bar and navigation bar icon colors
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(!isDarkMode);
+            controller.setAppearanceLightNavigationBars(!isDarkMode);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -73,6 +88,25 @@ public class MainActivity extends AppCompatActivity {
         urlInput = findViewById(R.id.et_url);
         topBar = findViewById(R.id.top_bar);
         progressBar = findViewById(R.id.progress_bar);
+
+        // Handle window insets for status bar and navigation bar
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawer_layout), (v, windowInsets) -> {
+            Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            
+            // Top bar padding for status bar
+            topBar.setPadding(topBar.getPaddingLeft(), systemBars.top, topBar.getPaddingRight(), 0);
+            
+            // Bottom bar padding for navigation bar
+            View bottomBar = findViewById(R.id.bottom_bar);
+            bottomBar.setPadding(bottomBar.getPaddingLeft(), bottomBar.getPaddingTop(), bottomBar.getPaddingRight(), systemBars.bottom);
+            
+            // NavigationView padding
+            navigationView.setPadding(0, 0, 0, systemBars.bottom);
+            // Header padding handled by the full-width background now
+            
+            return windowInsets;
+        });
+
         swipeRefresh = findViewById(R.id.swipe_refresh);
 
         btnBack = findViewById(R.id.btn_back);
@@ -425,7 +459,13 @@ public class MainActivity extends AppCompatActivity {
 
         android.util.DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         int screenWidth = displayMetrics.widthPixels;
-        int cardWidthPx = (int) (280 * displayMetrics.density);
+        float screenRatio = (float) screenWidth / displayMetrics.heightPixels;
+        float density = displayMetrics.density;
+        int cardHeight = displayMetrics.heightPixels - (int) (64 * density);
+        int cardWidthPx = (int) (cardHeight * screenRatio);
+        int maxWidth = (int) (screenWidth * 0.85f);
+        if (cardWidthPx > maxWidth) cardWidthPx = maxWidth;
+
         int padding = (screenWidth - cardWidthPx) / 2;
         tabSwitcher.setPadding(padding, 0, padding, 0);
 
@@ -717,7 +757,13 @@ public class MainActivity extends AppCompatActivity {
                 float squeezeFactor = (float) Math.pow(fraction, 4.0);
 
                 float cardWidth = cardView.getWidth();
-                if (cardWidth <= 0) cardWidth = 280 * getResources().getDisplayMetrics().density;
+                if (cardWidth <= 0) {
+                    float screenRatio = (float) getResources().getDisplayMetrics().widthPixels / getResources().getDisplayMetrics().heightPixels;
+                    int cHeight = getResources().getDisplayMetrics().heightPixels - (int) (64 * getResources().getDisplayMetrics().density);
+                    cardWidth = (int) (cHeight * screenRatio);
+                    int maxW = (int) (getResources().getDisplayMetrics().widthPixels * 0.85f);
+                    if (cardWidth > maxW) cardWidth = maxW;
+                }
 
                 float maxSqueeze = cardWidth * 0.60f;
 

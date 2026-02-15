@@ -9,6 +9,12 @@ import android.preference.PreferenceManager;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.core.graphics.Insets;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -21,8 +27,33 @@ public class SettingsActivity extends AppCompatActivity {
         androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(isDarkMode ? 
             androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES : androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
 
+        // Enable edge-to-edge
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        
+        // Set status bar and navigation bar icon colors
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(!isDarkMode);
+            controller.setAppearanceLightNavigationBars(!isDarkMode);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        Toolbar toolbar = findViewById(R.id.toolbar_settings);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        // Handle window insets
+        View mainView = findViewById(android.R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            toolbar.setPadding(toolbar.getPaddingLeft(), insets.top, toolbar.getPaddingRight(), 0);
+            v.setPadding(v.getPaddingLeft(), 0, v.getPaddingRight(), insets.bottom);
+            return windowInsets;
+        });
 
         View containerSearchEngine = findViewById(R.id.container_search_engine_select);
         tvCurrentEngine = findViewById(R.id.tv_current_engine);

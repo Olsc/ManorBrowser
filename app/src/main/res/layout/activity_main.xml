@@ -15,7 +15,8 @@
         <LinearLayout
             android:id="@+id/top_bar"
             android:layout_width="0dp"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
             android:background="@color/background_surface"
             android:elevation="4dp"
             android:gravity="center_vertical"
@@ -115,9 +116,7 @@
                 android:visibility="gone"
                 android:background="@android:color/transparent"
                 android:clipToPadding="false"
-                android:clipChildren="false"
-                android:paddingStart="32dp"
-                android:paddingEnd="32dp" />
+                android:clipChildren="false" />
 
             <TextView
                 android:id="@+id/tv_tab_count"
@@ -140,7 +139,8 @@
         <LinearLayout
             android:id="@+id/bottom_bar"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
+            android:minHeight="56dp"
             android:background="@color/background_surface"
             android:elevation="8dp"
             android:gravity="center"
@@ -215,7 +215,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true"
+        android:fitsSystemWindows="false"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/activity_main_drawer" />
 

@@ -1,0 +1,70 @@
+name: Bug Report
+description: File a bug or crash report for Manor Browser
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting a bug report; please fill in with as much detail as possible.
+  - type: dropdown
+    id: app_version
+    attributes:
+      label: Are you on the latest version of Manor Browser?
+      description: If not, you must update first.
+      options:
+        - No, I need to download a newer version and try again.
+        - Yes, I'm on the latest release of Manor Browser.
+        - Yes, I'm on a pre-release/beta build.
+    validations:
+      required: true
+  - type: textarea
+    id: device_info
+    attributes:
+      label: Device Information
+      description: Please describe your device (model, manufacturer, Android version, OS skin like MIUI/ColorOS).
+      placeholder: e.g., Pixel 6, Android 14, or Xiaomi 13, MIUI 14
+    validations:
+      required: true
+  - type: textarea
+    id: url_info
+    attributes:
+      label: Affected URL (if applicable)
+      description: Did this occur on a specific website? Please provide the URL.
+      placeholder: https://example.com
+    validations:
+      required: false
+  - type: dropdown
+    id: category
+    attributes:
+      label: Bug Category
+      description: Which part of the browser is affected?
+      options:
+        - Rendering/Web Content (GeckoView)
+        - User Interface (Tabs, Menus, Toolbar)
+        - Performance/Lag
+        - Crash/Hang
+        - Networking/Downloads
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: Describe the issue.
+      description: What happened? Should something else have happened instead? Please provide clear steps to reproduce the issue.
+      placeholder: |
+        1. Open the app
+        2. Go to URL...
+        3. Click on...
+        4. App crashes / Page doesn't load
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: |
+        Please provide relevant log output (Logcat). You can get these through ADB or Android Studio. This is extremely helpful for debugging crashes!
+    validations:
+      required: false

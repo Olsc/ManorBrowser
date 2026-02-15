@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
+    android:layout_height="120dp"
     android:orientation="vertical"
-    android:background="@color/background_surface">
+    android:background="@drawable/nav_header_bg_gradient">
+
+    <!-- Simple full-width purple header block -->
+    <!-- Content can be added here if needed in future -->
 
 </LinearLayout>
