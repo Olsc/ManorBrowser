@@ -7,6 +7,9 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.SeekBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +19,10 @@ public class ReaderActivity extends AppCompatActivity {
     private TextView contentTextView;
     private View readerContainer;
     private SeekBar fontSizeSeekBar;
+    private View controlContent;
+    private ImageView expandIcon;
+    private boolean isExpanded = true;
+    
     private int currentFontSize = 16;
     private int currentTheme = 0; // 0: 护眼绿, 1: 米黄, 2: 夜间
     
@@ -34,6 +41,8 @@ public class ReaderActivity extends AppCompatActivity {
         contentTextView = findViewById(R.id.reader_content);
         readerContainer = findViewById(R.id.reader_container);
         fontSizeSeekBar = findViewById(R.id.font_size_seekbar);
+        controlContent = findViewById(R.id.control_content);
+        expandIcon = findViewById(R.id.expand_icon);
         
         Intent intent = getIntent();
         String content = intent.getStringExtra("content");
@@ -48,9 +57,34 @@ public class ReaderActivity extends AppCompatActivity {
             String formattedContent = formatContent(content);
             contentTextView.setText(formattedContent);
         }
+        
+        setupControlPanel();
         setupFontSizeControl();
         setupThemeButtons();
         applyTheme(0); // 默认护眼绿
+    }
+    
+    private void setupControlPanel() {
+        View controlHeader = findViewById(R.id.control_header);
+        controlHeader.setOnClickListener(v -> toggleControlPanel());
+    }
+    
+    private void toggleControlPanel() {
+        isExpanded = !isExpanded;
+        
+        // 旋转箭头动画
+        RotateAnimation rotate = new RotateAnimation(
+            isExpanded ? -90 : 90,
+            isExpanded ? 90 : -90,
+            Animation.RELATIVE_TO_SELF, 0.5f,
+            Animation.RELATIVE_TO_SELF, 0.5f
+        );
+        rotate.setDuration(300);
+        rotate.setFillAfter(true);
+        expandIcon.startAnimation(rotate);
+        
+        // 展开/收起内容
+        controlContent.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
     }
     private String formatContent(String content) {
         // 移除多余的空行

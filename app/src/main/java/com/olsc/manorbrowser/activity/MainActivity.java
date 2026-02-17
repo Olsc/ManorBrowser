@@ -1687,32 +1687,78 @@ public class MainActivity extends AppCompatActivity {
         if (session != null) {
             Toast.makeText(this, R.string.msg_reader_mode_loading, Toast.LENGTH_SHORT).show();
             
+            // 改进的内容提取脚本，提取更完整的网页文字
             String script = "javascript:(function(){" +
                 "var content = '';" +
                 "var title = document.title;" +
-                "var article = document.querySelector('article') || document.querySelector('main') || document.body;" +
+                
+                // 尝试找到主要内容区域
+                "var article = document.querySelector('article') || " +
+                "              document.querySelector('[role=\"main\"]') || " +
+                "              document.querySelector('main') || " +
+                "              document.querySelector('.content') || " +
+                "              document.querySelector('.article') || " +
+                "              document.querySelector('#content') || " +
+                "              document.body;" +
+                
+                // 递归提取文本的函数
                 "function extractText(node) {" +
+                "  if (!node) return;" +
                 "  if (node.nodeType === Node.TEXT_NODE) {" +
                 "    var text = node.textContent.trim();" +
-                "    if (text.length > 0) content += text + '\\n\\n';" +
+                "    if (text.length > 0) {" +
+                "      content += text + ' ';" +
+                "    }" +
                 "  } else if (node.nodeType === Node.ELEMENT_NODE) {" +
                 "    var tag = node.tagName.toLowerCase();" +
-                "    if (tag === 'script' || tag === 'style' || tag === 'noscript') return;" +
-                "    if (tag === 'h1' || tag === 'h2' || tag === 'h3') {" +
+                "    var style = window.getComputedStyle(node);" +
+                
+                // 跳过隐藏元素和不需要的标签
+                "    if (style.display === 'none' || style.visibility === 'hidden') return;" +
+                "    if (tag === 'script' || tag === 'style' || tag === 'noscript' || " +
+                "        tag === 'iframe' || tag === 'nav' || tag === 'header' || " +
+                "        tag === 'footer' || tag === 'aside') return;" +
+                
+                // 跳过广告和导航相关的class
+                "    var className = node.className || '';" +
+                "    if (typeof className === 'string' && " +
+                "        (className.includes('ad') || className.includes('nav') || " +
+                "         className.includes('menu') || className.includes('sidebar') || " +
+                "         className.includes('comment'))) return;" +
+                
+                // 处理标题
+                "    if (tag === 'h1' || tag === 'h2' || tag === 'h3' || tag === 'h4' || tag === 'h5' || tag === 'h6') {" +
                 "      content += '\\n\\n=== ' + node.textContent.trim() + ' ===\\n\\n';" +
-                "    } else if (tag === 'p' || tag === 'div' || tag === 'li') {" +
+                "      return;" +
+                "    }" +
+                
+                // 处理段落和列表
+                "    if (tag === 'p' || tag === 'li' || tag === 'blockquote') {" +
                 "      for (var i = 0; i < node.childNodes.length; i++) {" +
                 "        extractText(node.childNodes[i]);" +
                 "      }" +
-                "      if (tag === 'p') content += '\\n';" +
-                "    } else {" +
-                "      for (var i = 0; i < node.childNodes.length; i++) {" +
-                "        extractText(node.childNodes[i]);" +
-                "      }" +
+                "      content += '\\n\\n';" +
+                "      return;" +
+                "    }" +
+                
+                // 处理换行
+                "    if (tag === 'br') {" +
+                "      content += '\\n';" +
+                "      return;" +
+                "    }" +
+                
+                // 递归处理子节点
+                "    for (var i = 0; i < node.childNodes.length; i++) {" +
+                "      extractText(node.childNodes[i]);" +
                 "    }" +
                 "  }" +
                 "}" +
+                
                 "extractText(article);" +
+                
+                // 清理多余的空白
+                "content = content.replace(/\\n{3,}/g, '\\n\\n').trim();" +
+                
                 "alert('READER_MODE:' + title + '|||' + content);" +
                 "})()";
             
