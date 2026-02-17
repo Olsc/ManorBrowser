@@ -22,6 +22,7 @@ public class TabSwitcherAdapter extends RecyclerView.Adapter<TabSwitcherAdapter.
     public interface OnTabActionListener {
         void onTabClick(int position);
         void onTabClose(int position);
+        void onTabLongPress(int position);
     }
 
     public TabSwitcherAdapter(List<TabInfo> tabs, OnTabActionListener listener) {
@@ -113,6 +114,15 @@ public class TabSwitcherAdapter extends RecyclerView.Adapter<TabSwitcherAdapter.
                 if (pos != RecyclerView.NO_POSITION) {
                     listener.onTabClick(pos);
                 }
+            });
+
+            itemView.setOnLongClickListener(v -> {
+                int pos = getBindingAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    listener.onTabLongPress(pos);
+                    return true;
+                }
+                return false;
             });
         }
     }

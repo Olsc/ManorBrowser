@@ -50,6 +50,15 @@ public class PasswordStorage {
         saveAll(context, items);
     }
 
+    public static void deletePassword(Context context, PasswordItem itemToDelete) {
+        List<PasswordItem> items = loadPasswords(context);
+        items.removeIf(item -> 
+            item.url.equals(itemToDelete.url) && 
+            item.username.equals(itemToDelete.username) &&
+            item.timestamp == itemToDelete.timestamp);
+        saveAll(context, items);
+    }
+
     private static void saveAll(Context context, List<PasswordItem> items) {
         try {
             JSONArray array = new JSONArray();

@@ -126,6 +126,18 @@
             android:parentActivityName=".activity.MainActivity"
             android:theme="@style/Theme.ManorBrowser" />
 
+        <activity
+            android:name=".activity.ReaderActivity"
+            android:label="@string/title_reader_mode"
+            android:parentActivityName=".activity.MainActivity"
+            android:theme="@style/Theme.ManorBrowser" />
+
+        <activity
+            android:name=".activity.PasswordManagerActivity"
+            android:label="@string/title_password_manager"
+            android:parentActivityName=".activity.SettingsActivity"
+            android:theme="@style/Theme.ManorBrowser" />
+
     </application>
 
 </manifest>

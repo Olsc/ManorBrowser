@@ -161,19 +161,84 @@ public class BookmarkActivity extends AppCompatActivity {
     }
 
     private void showActionDialog(BookmarkItem item) {
-        String[] options = {
-            getString(R.string.action_delete),
-            getString(R.string.action_move_to)
-        };
+        String[] options;
+        if (item.type == BookmarkItem.Type.FOLDER) {
+            options = new String[]{
+                getString(R.string.action_edit),
+                getString(R.string.action_delete),
+                getString(R.string.action_move_to)
+            };
+        } else {
+            options = new String[]{
+                getString(R.string.action_edit),
+                getString(R.string.action_delete),
+                getString(R.string.action_move_to)
+            };
+        }
+        
         new AlertDialog.Builder(this)
             .setTitle(item.title)
             .setItems(options, (dialog, which) -> {
                 if (which == 0) {
-                    showDeleteConfirm(item);
+                    showEditDialog(item);
                 } else if (which == 1) {
+                    showDeleteConfirm(item);
+                } else if (which == 2) {
                     showMoveDialog(item);
                 }
             })
+            .show();
+    }
+
+    private void showEditDialog(BookmarkItem item) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_password, null);
+        EditText titleInput = dialogView.findViewById(R.id.input_url);
+        EditText urlInput = dialogView.findViewById(R.id.input_username);
+        EditText passwordInput = dialogView.findViewById(R.id.input_password);
+        
+        // 重用布局，但改变标签含义
+        ((com.google.android.material.textfield.TextInputLayout) titleInput.getParent().getParent())
+            .setHint(getString(R.string.label_bookmark_title));
+        
+        titleInput.setText(item.title);
+        
+        if (item.type == BookmarkItem.Type.FOLDER) {
+            urlInput.setVisibility(View.GONE);
+            ((View) urlInput.getParent().getParent()).setVisibility(View.GONE);
+        } else {
+            ((com.google.android.material.textfield.TextInputLayout) urlInput.getParent().getParent())
+                .setHint(getString(R.string.label_bookmark_url));
+            urlInput.setText(item.url);
+        }
+        
+        // 隐藏密码输入框
+        View passwordLayout = (View) passwordInput.getParent().getParent();
+        passwordLayout.setVisibility(View.GONE);
+
+        new AlertDialog.Builder(this)
+            .setTitle(item.type == BookmarkItem.Type.FOLDER ? 
+                R.string.title_edit_folder : R.string.title_edit_bookmark)
+            .setView(dialogView)
+            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                String newTitle = titleInput.getText().toString().trim();
+                if (newTitle.isEmpty()) {
+                    Toast.makeText(this, R.string.msg_fill_all_fields, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                item.title = newTitle;
+                if (item.type != BookmarkItem.Type.FOLDER) {
+                    String newUrl = urlInput.getText().toString().trim();
+                    if (!newUrl.isEmpty()) {
+                        item.url = newUrl;
+                    }
+                }
+                
+                saveAll();
+                refreshList();
+                Toast.makeText(this, R.string.msg_bookmark_updated, Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton(android.R.string.cancel, null)
             .show();
     }
 

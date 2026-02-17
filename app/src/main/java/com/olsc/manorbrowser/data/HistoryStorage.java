@@ -100,5 +100,15 @@ public class HistoryStorage {
          File file = new File(context.getFilesDir(), FILE_NAME);
          if (file.exists()) file.delete();
     }
+
+    public static void deleteHistoryItem(Context context, HistoryItem itemToDelete) {
+        new Thread(() -> {
+            List<HistoryItem> history = loadHistory(context);
+            history.removeIf(item -> 
+                item.url.equals(itemToDelete.url) && 
+                item.timestamp == itemToDelete.timestamp);
+            saveHistory(context, history);
+        }).start();
+    }
 }
 

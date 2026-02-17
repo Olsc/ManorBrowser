@@ -424,6 +424,18 @@ public class MainActivity extends AppCompatActivity {
                     String textToCopy = message.substring("COPY_TEXT:".length());
                     runOnUiThread(() -> copyToClipboard(textToCopy));
                     return GeckoResult.fromValue(prompt.dismiss());
+                } else if (message != null && message.startsWith("READER_MODE:")) {
+                    String data = message.substring("READER_MODE:".length());
+                    String[] parts = data.split("\\|\\|\\|", 2);
+                    String title = parts.length > 0 ? parts[0] : "";
+                    String content = parts.length > 1 ? parts[1] : "";
+                    
+                    if (content.trim().isEmpty()) {
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, R.string.msg_reader_mode_failed, Toast.LENGTH_SHORT).show());
+                    } else {
+                        runOnUiThread(() -> openReaderActivity(title, content));
+                    }
+                    return GeckoResult.fromValue(prompt.dismiss());
                 }
                 return null; 
             }
@@ -462,14 +474,12 @@ public class MainActivity extends AppCompatActivity {
                     @NonNull LoadRequest request) {
                 String uri = request.uri;
                 
-                if (uri.startsWith("intent:")) {
-                    handleExternalAppRedirect(uri);
-                    return GeckoResult.fromValue(AllowOrDeny.DENY);
-                }
-                
-                if (isExternalAppLink(uri)) {
-                    handleExternalAppRedirect(uri);
-                    return GeckoResult.fromValue(AllowOrDeny.DENY);
+                // 使用改进的IntentHelper处理外部应用跳转
+                if (com.olsc.manorbrowser.utils.IntentHelper.shouldInterceptUrl(uri)) {
+                    boolean handled = com.olsc.manorbrowser.utils.IntentHelper.tryOpenExternalApp(MainActivity.this, uri);
+                    if (handled) {
+                        return GeckoResult.fromValue(AllowOrDeny.DENY);
+                    }
                 }
                 
                 return GeckoResult.fromValue(AllowOrDeny.ALLOW);
@@ -534,6 +544,11 @@ public class MainActivity extends AppCompatActivity {
                 closeTab(position);
 
                 tabSwitcher.postDelayed(this::updateCardScales, 300);
+            }
+
+            @Override
+            public void onTabLongPress(int position) {
+                showTabEditDialog(position);
             }
 
             private void updateCardScales() {
@@ -720,6 +735,9 @@ public class MainActivity extends AppCompatActivity {
                 showAddBookmarkDialog();
             } else if (id == R.id.nav_bookmarks) {
                 android.content.Intent intent = new android.content.Intent(this, BookmarkActivity.class);
+                startActivity(intent);
+            } else if (id == R.id.nav_passwords) {
+                android.content.Intent intent = new android.content.Intent(this, PasswordManagerActivity.class);
                 startActivity(intent);
             } else if (id == R.id.nav_theme) {
                 navigationView.postDelayed(this::toggleTheme, 300);
@@ -1232,7 +1250,7 @@ public class MainActivity extends AppCompatActivity {
 
      private void showWebContextMenu(ContextElement element) {
         final List<String> items = new ArrayList<>();
-        final List<Integer> actions = new ArrayList<>(); // 0: new tab, 1: download, 2: download link, 3: copy link, 4: copy image src, 5: free copy, 6: copy text
+        final List<Integer> actions = new ArrayList<>(); // 0: new tab, 1: download, 2: download link, 3: copy link, 4: copy image src, 5: reader mode, 6: copy text
 
         String url = element.linkUri != null ? element.linkUri : element.srcUri;
         
@@ -1268,7 +1286,7 @@ public class MainActivity extends AppCompatActivity {
             actions.add(4);
         }
         
-        items.add(getString(R.string.action_free_copy));
+        items.add(getString(R.string.action_reader_mode));
         actions.add(5);
 
         new androidx.appcompat.app.AlertDialog.Builder(this)
@@ -1286,7 +1304,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (action == 4) {
                     copyToClipboard(element.srcUri);
                 } else if (action == 5) {
-                    enableFreeCopyMode();
+                    enableReaderMode();
                 } else if (action == 6) {
                     copyLinkTextAtPoint();
                 }
@@ -1774,5 +1792,77 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton(R.string.action_deny, null)
                 .show();
         });
+    }
+
+    private void showTabEditDialog(int position) {
+        if (position < 0 || position >= tabs.size()) return;
+        
+        TabInfo tab = tabs.get(position);
+        
+        View dialogView = getLayoutInflater().inflate(R.layout.activity_bookmarks, null);
+        EditText titleInput = new EditText(this);
+        titleInput.setText(tab.title);
+        titleInput.setHint(R.string.label_tab_title);
+        titleInput.setPadding(50, 30, 50, 30);
+        
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.title_edit_tab)
+            .setView(titleInput)
+            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                String newTitle = titleInput.getText().toString().trim();
+                if (!newTitle.isEmpty()) {
+                    tab.title = newTitle;
+                    tabSwitcherAdapter.notifyItemChanged(position);
+                    TabStorage.saveTabs(this, tabs);
+                    Toast.makeText(this, R.string.msg_tab_updated, Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
+    }
+
+    private void enableReaderMode() {
+        GeckoSession session = getCurrentSession();
+        if (session != null) {
+            Toast.makeText(this, R.string.msg_reader_mode_loading, Toast.LENGTH_SHORT).show();
+            
+            String script = "javascript:(function(){" +
+                "var content = '';" +
+                "var title = document.title;" +
+                "var article = document.querySelector('article') || document.querySelector('main') || document.body;" +
+                "function extractText(node) {" +
+                "  if (node.nodeType === Node.TEXT_NODE) {" +
+                "    var text = node.textContent.trim();" +
+                "    if (text.length > 0) content += text + '\\n\\n';" +
+                "  } else if (node.nodeType === Node.ELEMENT_NODE) {" +
+                "    var tag = node.tagName.toLowerCase();" +
+                "    if (tag === 'script' || tag === 'style' || tag === 'noscript') return;" +
+                "    if (tag === 'h1' || tag === 'h2' || tag === 'h3') {" +
+                "      content += '\\n\\n=== ' + node.textContent.trim() + ' ===\\n\\n';" +
+                "    } else if (tag === 'p' || tag === 'div' || tag === 'li') {" +
+                "      for (var i = 0; i < node.childNodes.length; i++) {" +
+                "        extractText(node.childNodes[i]);" +
+                "      }" +
+                "      if (tag === 'p') content += '\\n';" +
+                "    } else {" +
+                "      for (var i = 0; i < node.childNodes.length; i++) {" +
+                "        extractText(node.childNodes[i]);" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}" +
+                "extractText(article);" +
+                "alert('READER_MODE:' + title + '|||' + content);" +
+                "})()";
+            
+            session.loadUri(script);
+        }
+    }
+
+    private void openReaderActivity(String title, String content) {
+        android.content.Intent intent = new android.content.Intent(this, ReaderActivity.class);
+        intent.putExtra("title", title);
+        intent.putExtra("content", content);
+        startActivity(intent);
     }
 }
