@@ -11,7 +11,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+
 import androidx.core.view.WindowCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -36,17 +36,10 @@ public class AboutActivity extends AppCompatActivity {
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(R.string.title_about);
-        }
         View mainView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            toolbar.setPadding(toolbar.getPaddingLeft(), insets.top, toolbar.getPaddingRight(), 0);
-            v.setPadding(v.getPaddingLeft(), 0, v.getPaddingRight(), insets.bottom);
+            v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), insets.bottom);
             return windowInsets;
         });
         View llSourceCode = findViewById(R.id.ll_source_code);
@@ -116,10 +109,5 @@ public class AboutActivity extends AppCompatActivity {
     @Override
     protected void attachBaseContext(android.content.Context newBase) {
         super.attachBaseContext(com.olsc.manorbrowser.utils.LocaleHelper.onAttach(newBase));
-    }
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
     }
 }
