@@ -234,6 +234,7 @@
     </queries>
 
     <application
+        android:name=".ManorBrowserApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -249,6 +250,7 @@
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -324,7 +326,8 @@
         <activity
             android:name=".activity.SettingsActivity"
             android:label="@string/title_settings"
-            android:parentActivityName=".activity.MainActivity" />
+            android:parentActivityName=".activity.MainActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".activity.HistoryActivity"

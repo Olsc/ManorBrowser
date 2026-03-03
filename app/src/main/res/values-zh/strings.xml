@@ -278,4 +278,12 @@ URL: %1$s</string>
     <string name="pref_theme_title">显示主题</string>
     <string name="pref_theme_desc">在白天与夜间模式之间切换</string>
     <string name="action_fullscreen">全屏模式</string>
+    <string name="title_remote_debugging">线上远程调试</string>
+    <string name="desc_remote_debugging">开启端口供纯 Python 在线控制与调试</string>
+    <string name="msg_remote_debug_restart">远程调试设置将在重启应用后生效</string>
+    <string name="title_remote_control_active">远程控制已连接</string>
+    <string name="action_disconnect">断开连接</string>
+    <string name="msg_remote_control_disconnected">远程控制已断开</string>
+    <string name="msg_remote_server_started">远程控制已就绪: %1$s:%2$d</string>
+    <string name="msg_remote_server_failed">命令服务器启动失败</string>
 </resources>

@@ -15,7 +15,9 @@ public class Config {
     public static final String DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0";
 
     // --- SharedPreferences 键名 ---
-    /** 偏好设置文件名 */
+    /** 统一偏好设置文件名 */
+    public static final String PREFERENCE_NAME = "theme_prefs";
+    /** 兼容旧引用：偏好设置文件名 */
     public static final String PREF_NAME_THEME = "theme_prefs";
     /** 深色模式开关状态 (boolean) */
     public static final String PREF_KEY_DARK_MODE = "is_dark_mode";
@@ -35,6 +37,8 @@ public class Config {
     public static final String PREF_KEY_DESKTOP_MODE = "desktop_mode";
     /** 底部左侧第一个按钮功能 (String) */
     public static final String PREF_KEY_LEFT_BUTTON_FUNCTION = "left_button_function_v2";
+    /** 是否启用 AI 远程助手 (boolean) */
+    public static final String PREF_KEY_AI_REMOTE_ENABLED = "ai_remote_enabled";
     /** 自定义背景图片路径 (String) */
     public static final String PREF_KEY_CUSTOM_BG_IMAGE = "custom_bg_image";
 

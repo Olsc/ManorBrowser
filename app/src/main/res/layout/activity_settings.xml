@@ -22,14 +22,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="100dp">
 
-            <!-- Section: General -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -54,7 +55,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Search Engine -->
                     <LinearLayout
                         android:id="@+id/container_search_engine_select"
                         android:layout_width="match_parent"
@@ -105,7 +105,6 @@
                         android:background="@color/divider_color"
                         android:layout_marginStart="56dp" />
 
-                    <!-- Language -->
                     <LinearLayout
                         android:id="@+id/container_language_select"
                         android:layout_width="match_parent"
@@ -156,7 +155,6 @@
                         android:background="@color/divider_color"
                         android:layout_marginStart="56dp" />
 
-                    <!-- Desktop Mode -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -202,7 +200,6 @@
                         android:background="@color/divider_color"
                         android:layout_marginStart="56dp" />
 
-                    <!-- Default Browser -->
                     <LinearLayout
                         android:id="@+id/container_default_browser"
                         android:layout_width="match_parent"
@@ -253,7 +250,6 @@
                         android:background="@color/divider_color"
                         android:layout_marginStart="56dp" />
 
-                    <!-- System Downloader -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -297,7 +293,6 @@
 
             </androidx.cardview.widget.CardView>
 
-            <!-- Section: Personalization -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -322,7 +317,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Theme Switcher (Day/Night) -->
                     <LinearLayout
                         android:id="@+id/container_theme_switch"
                         android:layout_width="match_parent"
@@ -374,7 +368,6 @@
                         android:background="@color/divider_color"
                         android:layout_marginStart="56dp" />
 
-                    <!-- Background Effect -->
                     <LinearLayout
                         android:id="@+id/container_background_effect_select"
                         android:layout_width="match_parent"
@@ -419,7 +412,6 @@
                             app:tint="@color/divider_color" />
                     </LinearLayout>
                     
-                    <!-- Sub-options for Solid Color -->
                     <LinearLayout
                         android:id="@+id/container_solid_settings"
                         android:layout_width="match_parent"
@@ -441,7 +433,6 @@
                             android:background="?attr/selectableItemBackground" />
                     </LinearLayout>
 
-                    <!-- Sub-options for Image -->
                     <LinearLayout
                         android:id="@+id/container_image_settings"
                         android:layout_width="match_parent"
@@ -469,7 +460,6 @@
                         android:background="@color/divider_color"
                         android:layout_marginStart="56dp" />
 
-                    <!-- Home Button function -->
                     <LinearLayout
                         android:id="@+id/container_custom_home_button"
                         android:layout_width="match_parent"
@@ -518,7 +508,6 @@
 
             </androidx.cardview.widget.CardView>
 
-            <!-- Section: Privacy & Security -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -543,7 +532,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Password Manager -->
                     <LinearLayout
                         android:id="@+id/container_passwords"
                         android:layout_width="match_parent"
@@ -594,7 +582,6 @@
                         android:background="@color/divider_color"
                         android:layout_marginStart="56dp" />
 
-                    <!-- Cookies -->
                     <LinearLayout
                         android:id="@+id/container_cookies"
                         android:layout_width="match_parent"
@@ -643,7 +630,6 @@
 
             </androidx.cardview.widget.CardView>
 
-            <!-- Section: About -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -705,6 +691,125 @@
                         android:layout_height="20dp"
                         android:src="@drawable/ic_chevron_right"
                         app:tint="@color/divider_color" />
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_group_ai_control"
+                android:textSize="14sp"
+                android:textColor="@color/purple_500"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginBottom="8dp" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/background_surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_settings_ai"
+                            app:tint="@color/purple_500"
+                            android:layout_marginEnd="16dp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/title_ai_remote_control"
+                                android:textSize="16sp"
+                                android:textColor="@color/text_primary" />
+                            <TextView
+                                android:id="@+id/tv_ai_agent_status"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/msg_ai_not_configured"
+                                android:textSize="13sp"
+                                android:textColor="@color/text_secondary" />
+                        </LinearLayout>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/sw_ai_remote"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider_color"
+                        android:layout_marginStart="56dp" />
+
+                    <LinearLayout
+                        android:id="@+id/container_ai_server_url"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_search"
+                            app:tint="@color/icon_main"
+                            android:layout_marginEnd="16dp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/label_ai_server_address"
+                                android:textSize="16sp"
+                                android:textColor="@color/text_primary" />
+                            <TextView
+                                android:id="@+id/tv_current_ai_server_url"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/hint_ai_server_address"
+                                android:textSize="13sp"
+                                android:textColor="@color/text_secondary" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right"
+                            app:tint="@color/divider_color" />
+                    </LinearLayout>
+
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>

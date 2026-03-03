@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ai_overlay_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- 彩虹渐变背景（半透明，带模糊质感） -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/rainbow_gradient_overlay" />
+
+    <!-- 暗色半透明遮罩，使聊天内容更易读 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#B0000000" />
+
+    <!-- 整体布局：顶部标题栏 + 聊天列表 + 底部输入框 -->
+    <LinearLayout
+        android:id="@+id/ai_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- 顶部标题栏 -->
+        <LinearLayout
+            android:id="@+id/ai_overlay_topbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:background="#22FFFFFF">
+
+            <!-- AI 状态指示点 -->
+            <View
+                android:id="@+id/ai_status_dot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/shape_ai_status_dot"
+                android:layout_marginEnd="10dp" />
+
+            <!-- 标题 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Manor AI 助手"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_ai_current_page"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="正在监控当前网页..."
+                    android:textColor="#AAFFFFFF"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
+
+            <!-- 退出按钮 -->
+            <ImageButton
+                android:id="@+id/btn_exit_ai"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="#FFFFFF"
+                android:contentDescription="退出AI模式"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
+
+        <!-- 聊天消息列表 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_ai_chat"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:clipToPadding="false"
+            android:scrollbars="none" />
+
+        <!-- 底部输入区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#22FFFFFF"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <!-- 正在处理提示 -->
+            <LinearLayout
+                android:id="@+id/ai_thinking_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone"
+                android:layout_marginBottom="6dp">
+
+                <ProgressBar
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:indeterminateTint="#FFFFFF"
+                    android:layout_marginEnd="6dp" />
+
+                <TextView
+                    android:id="@+id/tv_ai_thinking"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AI 正在思考..."
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- 输入行 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_ai_input_box"
+                android:paddingStart="12dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp">
+
+                <EditText
+                    android:id="@+id/et_ai_input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="发送消息给 AI..."
+                    android:textColorHint="#88FFFFFF"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:maxLines="4"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:imeOptions="actionSend" />
+
+                <ImageButton
+                    android:id="@+id/btn_ai_send"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_ai_send_btn"
+                    android:src="@drawable/ic_search"
+                    app:tint="#FFFFFF"
+                    android:contentDescription="发送"
+                    android:layout_marginStart="6dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

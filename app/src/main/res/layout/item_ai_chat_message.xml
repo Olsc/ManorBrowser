@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ai_msg_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <!-- AI 消息行（左对齐） -->
+    <LinearLayout
+        android:id="@+id/row_ai"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="top"
+        android:visibility="gone">
+
+        <!-- AI 头像 -->
+        <TextView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:text="AI"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_ai_avatar"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="2dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- 正在思考状态 -->
+            <LinearLayout
+                android:id="@+id/ai_status_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone"
+                android:layout_marginBottom="4dp">
+                <ProgressBar
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:indeterminateTint="#AAFFFFFF"
+                    android:layout_marginEnd="4dp" />
+                <TextView
+                    android:id="@+id/tv_ai_status_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="思考中..."
+                    android:textColor="#AAFFFFFF"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <!-- Tool call 信息 -->
+            <LinearLayout
+                android:id="@+id/tool_call_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_tool_call"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:gravity="center"
+                    android:text="⚙"
+                    android:textColor="#AAFFFFFF"
+                    android:textSize="11sp"
+                    android:layout_marginEnd="5dp" />
+                <TextView
+                    android:id="@+id/tv_tool_call_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#AAFFFFFF"
+                    android:textSize="11sp"
+                    android:maxWidth="220dp"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
+            </LinearLayout>
+
+            <!-- AI 气泡 -->
+            <TextView
+                android:id="@+id/tv_ai_bubble"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_bubble_ai"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:lineSpacingMultiplier="1.4"
+                android:maxWidth="260dp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- 占位，防止气泡撑满右侧 -->
+        <View android:layout_width="60dp" android:layout_height="1dp" />
+    </LinearLayout>
+
+    <!-- 用户消息行（右对齐） -->
+    <LinearLayout
+        android:id="@+id/row_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="top"
+        android:visibility="gone">
+
+        <!-- 占位 -->
+        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tv_user_bubble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_bubble_user"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:maxWidth="240dp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- 用户头像 -->
+        <TextView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:text="我"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_user_avatar"
+            android:layout_marginTop="2dp" />
+    </LinearLayout>
+
+</LinearLayout>

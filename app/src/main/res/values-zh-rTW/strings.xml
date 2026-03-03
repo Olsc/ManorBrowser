@@ -275,4 +275,12 @@
     <string name="settings_group_about">關於</string>
     <string name="pref_theme_title">顯示主題</string>
     <string name="pref_theme_desc">在白天與夜間模式之間切換</string>
+    <string name="title_remote_debugging">線上遠程調試</string>
+    <string name="desc_remote_debugging">開啟埠供純 Python 在線控制與調試</string>
+    <string name="msg_remote_debug_restart">遠程調試設定將在重啟應用後生效</string>
+    <string name="title_remote_control_active">遠程控制已連接</string>
+    <string name="action_disconnect">中斷連線</string>
+    <string name="msg_remote_control_disconnected">遠程控制已斷開</string>
+    <string name="msg_remote_server_started">遠程控制已就绪: %1$s:%2$d</string>
+    <string name="msg_remote_server_failed">命令伺服器啟動失敗</string>
 </resources>

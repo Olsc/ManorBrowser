@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AI 头像背景：圆形，紫色 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <gradient
+        android:startColor="#7C4DFF"
+        android:endColor="#FF4081"
+        android:angle="135" />
+</shape>
