@@ -1,5 +1,8 @@
 /**
- * 设置界面，允许用户配置浏览器环境和个人偏好。
+ * 设置页面
+ *
+ * 提供各类浏览器偏好设置，包括：搜索引擎、语言、主题、背景特效、
+ * 隐私管理（密码/Cookie）、智能托管（AI 远程控制）等。
  */
 package com.olsc.manorbrowser.activity;
 import com.olsc.manorbrowser.R;
@@ -191,39 +194,65 @@ public class SettingsActivity extends AppCompatActivity {
                 swAiRemote.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     if (isChecked) {
                         String url = aiClient.getServerUrl();
-                        if (url != null && !url.isEmpty()) {
-                            aiClient.start();
-                            // 提示用户并返回
-                            android.widget.Toast.makeText(this, "智能托管已启动", android.widget.Toast.LENGTH_SHORT).show();
-                            finish();
-                        } else {
+                        if (url == null || url.isEmpty()) {
+                            // 尚未配置服务端地址，拒绝开启并引导配置
                             buttonView.setChecked(false);
                             android.widget.Toast.makeText(this, R.string.msg_ai_config_server_first, android.widget.Toast.LENGTH_SHORT).show();
                             showAiServerDialog(aiClient, tvAiServerUrl);
+                            return;
                         }
+                        // 异步检测服务器连通性，避免在主线程阻塞
+                        buttonView.setEnabled(false);
+                        new Thread(() -> {
+                            boolean reachable = false;
+                            try {
+                                java.net.HttpURLConnection conn = (java.net.HttpURLConnection)
+                                    new java.net.URL(url + "/api/status").openConnection();
+                                conn.setRequestMethod("HEAD");
+                                conn.setConnectTimeout(4000);
+                                conn.setReadTimeout(4000);
+                                reachable = (conn.getResponseCode() == 200);
+                                conn.disconnect();
+                            } catch (Exception ignored) {}
+                            final boolean canConnect = reachable;
+                            runOnUiThread(() -> {
+                                buttonView.setEnabled(true);
+                                if (canConnect) {
+                                    // 服务器可达，启动智能托管
+                                    aiClient.start();
+                                    getSharedPreferences(Config.PREFERENCE_NAME, android.content.Context.MODE_PRIVATE)
+                                        .edit().putBoolean(Config.PREF_KEY_AI_REMOTE_ENABLED, true).apply();
+                                    android.widget.Toast.makeText(this, R.string.msg_ai_started, android.widget.Toast.LENGTH_SHORT).show();
+                                    finish();
+                                } else {
+                                    // 服务器不可达，回拨开关并警告
+                                    buttonView.setChecked(false);
+                                    android.widget.Toast.makeText(this, R.string.msg_ai_server_unreachable, android.widget.Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }).start();
                     } else {
+                        // 用户主动关闭
                         aiClient.stop();
+                        getSharedPreferences(Config.PREFERENCE_NAME, android.content.Context.MODE_PRIVATE)
+                            .edit().putBoolean(Config.PREF_KEY_AI_REMOTE_ENABLED, false).apply();
                     }
-                    // 保存开关状态到配置
-                    getSharedPreferences(Config.PREFERENCE_NAME, android.content.Context.MODE_PRIVATE)
-                            .edit()
-                            .putBoolean(Config.PREF_KEY_AI_REMOTE_ENABLED, isChecked)
-                            .apply();
                 });
             }
         }
     }
 
-    /** 从 MainActivity 获取 AiCommandClient 实例 */
+    /**
+     * 从 Application 获取全局 AiCommandClient 实例
+     * （由 MainActivity 在启动时注入到 ManorBrowserApp 中）
+     */
     private com.olsc.manorbrowser.utils.AiCommandClient getAiCommandClient() {
         try {
-            // 通过 Application 对象获取（需 MainActivity 存储到 Application 级别）
-            android.app.Activity activity = this;
-            if (activity.getApplication() instanceof com.olsc.manorbrowser.ManorBrowserApp) {
-                return ((com.olsc.manorbrowser.ManorBrowserApp) activity.getApplication()).getAiCommandClient();
+            if (getApplication() instanceof com.olsc.manorbrowser.ManorBrowserApp) {
+                return ((com.olsc.manorbrowser.ManorBrowserApp) getApplication()).getAiCommandClient();
             }
         } catch (Exception e) {
-            android.util.Log.w("SettingsActivity", "getAiCommandClient: " + e.getMessage());
+            android.util.Log.w("SettingsActivity", "获取 AiCommandClient 失败: " + e.getMessage());
         }
         return null;
     }

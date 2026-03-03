@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Manor Browser</string>
     <string name="action_search">بحث أو إدخال عنوان</string>
@@ -267,4 +267,48 @@
     <string name="pref_theme_title">مظهر العرض</string>
     <string name="pref_theme_desc">التبديل بين الوضع الفاتح والداكن</string>
     <string name="action_fullscreen">وضع ملء الشاشة</string>
+    <string name="title_remote_debugging">تصحيح الأخطاء عن بعد</string>
+    <string name="desc_remote_debugging">تمكين التحكم عن بعد لـ بايثون</string>
+    <string name="msg_remote_debug_restart">سيسري إعداد تصحيح الأخطاء عن بعد بعد إعادة التشغيل.</string>
+    <string name="title_remote_control_active">التحكم عن بعد نشط</string>
+    <string name="action_disconnect">فصل</string>
+    <string name="msg_remote_control_disconnected">تم فصل التحكم عن بعد</string>
+    <string name="msg_remote_server_started">التحكم عن بعد جاهز: %1$s:%2$d</string>
+    <string name="msg_remote_server_failed">فشل بدء خادم الأوامر</string>
+
+    <string name="settings_group_ai_control">الاستضافة الذكية</string>
+    <string name="title_ai_remote_control">الاستضافة الذكية</string>
+    <string name="label_ai_server_address">عنوان الخادم</string>
+    <string name="hint_ai_server_address">أدخل عنوان الخادم</string>
+    <string name="msg_ai_not_configured">غير مهيأ</string>
+    <string name="msg_ai_not_started">لم يبدأ</string>
+    <string name="msg_ai_connected">متصل (استطلاع)</string>
+    <string name="msg_ai_connecting">محاولة الاتصال (فشلت)...</string>
+    <string name="msg_ai_config_server_first">يرجى تهيئة عنوان الخادم أولاً</string>
+
+    <!-- AI Overlay / AI Assistant -->
+    <string name="ai_assistant_name">مساعد Manor AI</string>
+    <string name="ai_monitoring_current_page">مراقبة الصفحة الحالية...</string>
+    <string name="ai_monitoring_with_title">مراقبة: %1$s</string>
+    <string name="ai_thinking">الذكاء الاصطناعي يفكر...</string>
+    <string name="ai_hint_send_message">إرسال رسالة إلى الذكاء الاصطناعي...</string>
+    <string name="ai_msg_hello">مرحباً! أنا مساعد Manor AI.\n\nيمكنني تشغيل المتصفح مباشرة في الوضع المنبثق، والبحث عن المعلومات، وقراءة صفحة الويب الحالية. ماذا يمكنني أن أفعل لك؟</string>
+    <string name="ai_msg_sending_request">جاري إرسال الطلب...</string>
+    <string name="ai_msg_waiting_reply">في انتظار الرد...</string>
+    <string name="ai_msg_request_failed">فشل الطلب: HTTP %1$d</string>
+    <string name="ai_msg_thinking">تفكير...</string>
+    <string name="ai_msg_running_tool">جاري تشغيل الأداة: %1$s</string>
+    <string name="ai_msg_received_data">تم استلام بيانات الصفحة، جاري متابعة الاستنتاج...</string>
+    <string name="ai_msg_processing_result">جاري معالجة نتائج الصفحة...</string>
+    <string name="ai_msg_error">حدث خطأ: %1$s</string>
+    <string name="ai_msg_comm_error">خطأ في الاتصال أو انتهت المهلة: %1$s</string>
+    <string name="ai_msg_not_connected">غير متصل: يرجى تهيئة عنوان خادم الذكاء الاصطناعي في الإعدادات وتشغيل المفتاح.</string>
+    <string name="ai_tool_call_label">استدعاء الأداة: %1$s</string>
+    <string name="action_exit_ai">الخروج من وضع الذكاء الاصطناعي</string>
+    <string name="action_send">إرسال</string>
+    <string name="msg_ai_started">بدأت الاستضافة الذكية</string>
+    <string name="msg_ai_server_unreachable">تعذّر الاتصال بالخادم. يرجى التحقق من عنوان الخادم والتأكد من أنه يعمل.</string>
+    <string name="copyright_text">© 2026 Olsc</string>
+    <string name="title_reader_settings">إعدادات القراءة</string>
+    <string name="password_mask">••••••••</string>
 </resources>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Manor Browser</string>
     <string name="action_search">検索またはURLを入力</string>
@@ -276,4 +276,48 @@
     <string name="pref_theme_title">表示テーマ</string>
     <string name="pref_theme_desc">ライトモードとダークモードを切り替える</string>
     <string name="action_fullscreen">全画面モード</string>
+    <string name="title_remote_debugging">リモートデバッグ</string>
+    <string name="desc_remote_debugging">Pythonからのリモート制御を有効にする</string>
+    <string name="msg_remote_debug_restart">リモートデバッグ設定は再起動後に有効になります。</string>
+    <string name="title_remote_control_active">リモート制御が有効です</string>
+    <string name="action_disconnect">切断</string>
+    <string name="msg_remote_control_disconnected">リモート制御を切断しました</string>
+    <string name="msg_remote_server_started">リモート制御の準備完了: %1$s:%2$d</string>
+    <string name="msg_remote_server_failed">コマンドサーバーの起動に失敗しました</string>
+
+    <string name="settings_group_ai_control">インテリジェントホスティング</string>
+    <string name="title_ai_remote_control">インテリジェントホスティング</string>
+    <string name="label_ai_server_address">サーバーアドレス</string>
+    <string name="hint_ai_server_address">サーバーアドレスを入力</string>
+    <string name="msg_ai_not_configured">未設定</string>
+    <string name="msg_ai_not_started">未起動</string>
+    <string name="msg_ai_connected">接続済み (ポーリング中)</string>
+    <string name="msg_ai_connecting">接続を試行中 (失敗)...</string>
+    <string name="msg_ai_config_server_first">先にサーバーアドレスを設定してください</string>
+
+    <!-- AI Overlay / AI Assistant -->
+    <string name="ai_assistant_name">Manor AI アシスタント</string>
+    <string name="ai_monitoring_current_page">現在のページをモニタリング中...</string>
+    <string name="ai_monitoring_with_title">モニタリング中: %1$s</string>
+    <string name="ai_thinking">AIが考え中...</string>
+    <string name="ai_hint_send_message">AIにメッセージを送信...</string>
+    <string name="ai_msg_hello">こんにちは！私は Manor AI アシスタントです。\n\nポップアップモードでブラウザを直接操作したり、情報を検索したり、現在のウェブページを読んだりすることができます。何かお手伝いできることはありますか？</string>
+    <string name="ai_msg_sending_request">リクエストを送信中...</string>
+    <string name="ai_msg_waiting_reply">返信を待機中...</string>
+    <string name="ai_msg_request_failed">リクエストが失敗しました: HTTP %1$d</string>
+    <string name="ai_msg_thinking">考え中...</string>
+    <string name="ai_msg_running_tool">ツールを実行中: %1$s</string>
+    <string name="ai_msg_received_data">ページデータを受信しました。推論を継続します...</string>
+    <string name="ai_msg_processing_result">ページの結果を処理中...</string>
+    <string name="ai_msg_error">エラーが発生しました: %1$s</string>
+    <string name="ai_msg_comm_error">通信エラーまたはタイムアウト: %1$s</string>
+    <string name="ai_msg_not_connected">未接続：設定でAIサーバーアドレスを設定し、スイッチをオンにしてください。</string>
+    <string name="ai_tool_call_label">ツール呼び出し中: %1$s</string>
+    <string name="action_exit_ai">AIモードを終了</string>
+    <string name="action_send">送信</string>
+    <string name="msg_ai_started">インテリジェントホスティングを開始しました</string>
+    <string name="msg_ai_server_unreachable">サーバーに接続できません。サーバーアドレスを確認し、サーバーが起動しているか確認してください。</string>
+    <string name="copyright_text">© 2026 Olsc</string>
+    <string name="title_reader_settings">リーダー設定</string>
+    <string name="password_mask">••••••••</string>
 </resources>

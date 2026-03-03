@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Manor Browser</string>
     <string name="action_search">Arama yapın veya adres girin</string>
@@ -276,4 +276,48 @@
     <string name="pref_theme_title">Görüntü Teması</string>
     <string name="pref_theme_desc">Açık ve karanlık modlar arasında geçiş yapın</string>
     <string name="action_fullscreen">Tam Ekran Modu</string>
+    <string name="title_remote_debugging">Uzaktan Hata Ayıklama</string>
+    <string name="desc_remote_debugging">Python için uzaktan kontrolü etkinleştir</string>
+    <string name="msg_remote_debug_restart">Uzaktan hata ayıklama ayarı yeniden başlatıldıktan sonra geçerli olacaktır.</string>
+    <string name="title_remote_control_active">Uzaktan Kontrol Aktif</string>
+    <string name="action_disconnect">Bağlantıyı Kes</string>
+    <string name="msg_remote_control_disconnected">Uzaktan kontrol bağlantısı kesildi</string>
+    <string name="msg_remote_server_started">Uzaktan kontrol hazır: %1$s:%2$d</string>
+    <string name="msg_remote_server_failed">Komut sunucusu başlatılamadı</string>
+
+    <string name="settings_group_ai_control">Akıllı Hosting</string>
+    <string name="title_ai_remote_control">Akıllı Hosting</string>
+    <string name="label_ai_server_address">Sunucu Adresi</string>
+    <string name="hint_ai_server_address">Sunucu adresini girin</string>
+    <string name="msg_ai_not_configured">Yapılandırılmadı</string>
+    <string name="msg_ai_not_started">Başlatılmadı</string>
+    <string name="msg_ai_connected">Bağlı (Sorgulama)</string>
+    <string name="msg_ai_connecting">Bağlanmaya çalışılıyor (Başarısız)...</string>
+    <string name="msg_ai_config_server_first">Lütfen önce sunucu adresini yapılandırın</string>
+
+    <!-- AI Overlay / AI Assistant -->
+    <string name="ai_assistant_name">Manor AI Asistanı</string>
+    <string name="ai_monitoring_current_page">Mevcut sayfa izleniyor...</string>
+    <string name="ai_monitoring_with_title">İzleme: %1$s</string>
+    <string name="ai_thinking">AI düşünüyor...</string>
+    <string name="ai_hint_send_message">AI\'ya mesaj gönder...</string>
+    <string name="ai_msg_hello">Merhaba! Ben Manor AI Asistanıyım.\n\nTarayıcıyı doğrudan açılır pencere modunda çalıştırabilir, bilgi arayabilir ve mevcut web sayfasını okuyabilirim. Sizin için ne yapabilirim?</string>
+    <string name="ai_msg_sending_request">İstek gönderiliyor...</string>
+    <string name="ai_msg_waiting_reply">Yanıt bekleniyor...</string>
+    <string name="ai_msg_request_failed">İstek başarısız oldu: HTTP %1$d</string>
+    <string name="ai_msg_thinking">Düşünüyor...</string>
+    <string name="ai_msg_running_tool">Araç çalıştırılıyor: %1$s</string>
+    <string name="ai_msg_received_data">Sayfa verileri alındı, çıkarıma devam ediliyor...</string>
+    <string name="ai_msg_processing_result">Sayfa sonuçları işleniyor...</string>
+    <string name="ai_msg_error">Bir hata oluştu: %1$s</string>
+    <string name="ai_msg_comm_error">İletişim hatası veya zaman aşımı: %1$s</string>
+    <string name="ai_msg_not_connected">Bağlı değil: Lütfen ayarlardan AI sunucu adresini yapılandırın ve anahtarı açın.</string>
+    <string name="ai_tool_call_label">Araç çağrılıyor: %1$s</string>
+    <string name="action_exit_ai">AI Modundan Çık</string>
+    <string name="action_send">Gönder</string>
+    <string name="msg_ai_started">Akıllı Hosting başlatıldı</string>
+    <string name="msg_ai_server_unreachable">Sunucuya bağlanılamadı. Lütfen sunucu adresini kontrol edin ve sunucunun çalıştığından emin olun.</string>
+    <string name="copyright_text">© 2026 Olsc</string>
+    <string name="title_reader_settings">Okuma Ayarları</string>
+    <string name="password_mask">••••••••</string>
 </resources>

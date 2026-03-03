@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Manor Browser</string>
     <string name="action_search">Buscar o introducir dirección</string>
@@ -267,4 +267,48 @@
     <string name="pref_theme_title">Tema de pantalla</string>
     <string name="pref_theme_desc">Cambiar entre modo claro y oscuro</string>
     <string name="action_fullscreen">Modo pantalla completa</string>
+    <string name="title_remote_debugging">Depuración remota</string>
+    <string name="desc_remote_debugging">Habilitar control remoto para Python</string>
+    <string name="msg_remote_debug_restart">El ajuste de depuración remota se aplicará después de reiniciar.</string>
+    <string name="title_remote_control_active">Control remoto activo</string>
+    <string name="action_disconnect">Desconectar</string>
+    <string name="msg_remote_control_disconnected">Control remoto desconectado</string>
+    <string name="msg_remote_server_started">Control remoto listo: %1$s:%2$d</string>
+    <string name="msg_remote_server_failed">Error al iniciar el servidor de comandos</string>
+
+    <string name="settings_group_ai_control">Hosting Inteligente</string>
+    <string name="title_ai_remote_control">Hosting Inteligente</string>
+    <string name="label_ai_server_address">Dirección del servidor</string>
+    <string name="hint_ai_server_address">Introducir dirección del servidor</string>
+    <string name="msg_ai_not_configured">No configurado</string>
+    <string name="msg_ai_not_started">No iniciado</string>
+    <string name="msg_ai_connected">Conectado (Sondeando)</string>
+    <string name="msg_ai_connecting">Intentando conectar (Fallido)...</string>
+    <string name="msg_ai_config_server_first">Por favor, configure primero la dirección del servidor</string>
+
+    <!-- AI Overlay / AI Assistant -->
+    <string name="ai_assistant_name">Asistente de IA Manor</string>
+    <string name="ai_monitoring_current_page">Monitoreando página actual...</string>
+    <string name="ai_monitoring_with_title">Monitoreando: %1$s</string>
+    <string name="ai_thinking">La IA está pensando...</string>
+    <string name="ai_hint_send_message">Enviar mensaje a la IA...</string>
+    <string name="ai_msg_hello">¡Hola! Soy el asistente de IA Manor.\n\nPuedo operar el navegador directamente en modo ventana, buscar información y leer la página web actual. ¿Qué puedo hacer por ti?</string>
+    <string name="ai_msg_sending_request">Enviando solicitud...</string>
+    <string name="ai_msg_waiting_reply">Esperando respuesta...</string>
+    <string name="ai_msg_request_failed">Solicitud fallida: HTTP %1$d</string>
+    <string name="ai_msg_thinking">Pensando...</string>
+    <string name="ai_msg_running_tool">Ejecutando herramienta: %1$s</string>
+    <string name="ai_msg_received_data">Datos de página recibidos, continuando inferencia...</string>
+    <string name="ai_msg_processing_result">Procesando resultados de la página...</string>
+    <string name="ai_msg_error">Ocurrió un error: %1$s</string>
+    <string name="ai_msg_comm_error">Error de comunicación o tiempo de espera agotado: %1$s</string>
+    <string name="ai_msg_not_connected">No conectado: Por favor, configure la dirección del servidor de IA en los ajustes y active el interruptor.</string>
+    <string name="ai_tool_call_label">Llamando a la herramienta: %1$s</string>
+    <string name="action_exit_ai">Salir del modo IA</string>
+    <string name="action_send">Enviar</string>
+    <string name="msg_ai_started">Hosting Inteligente iniciado</string>
+    <string name="msg_ai_server_unreachable">No se puede conectar al servidor. Por favor, verifique la dirección del servidor y asegúrese de que el servidor esté en ejecución.</string>
+    <string name="copyright_text">© 2026 Olsc</string>
+    <string name="title_reader_settings">Ajustes de lectura</string>
+    <string name="password_mask">••••••••</string>
 </resources>

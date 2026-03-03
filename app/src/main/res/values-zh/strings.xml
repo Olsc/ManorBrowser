@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">领域浏览器</string>
     <string name="action_search">搜索或输入网址</string>
     <string name="action_home">主页</string>
@@ -286,4 +286,40 @@ URL: %1$s</string>
     <string name="msg_remote_control_disconnected">远程控制已断开</string>
     <string name="msg_remote_server_started">远程控制已就绪: %1$s:%2$d</string>
     <string name="msg_remote_server_failed">命令服务器启动失败</string>
+
+    <string name="settings_group_ai_control">智能托管</string>
+    <string name="title_ai_remote_control">智能托管</string>
+    <string name="label_ai_server_address">服务器地址</string>
+    <string name="hint_ai_server_address">输入服务器地址</string>
+    <string name="msg_ai_not_configured">未配置</string>
+    <string name="msg_ai_not_started">未启动</string>
+    <string name="msg_ai_connected">已连接 (正常轮询中)</string>
+    <string name="msg_ai_connecting">正在尝试连接 (失败)...</string>
+    <string name="msg_ai_config_server_first">请先设置服务器地址</string>
+
+    <!-- AI Overlay / AI Assistant -->
+    <string name="ai_assistant_name">Manor AI 助手</string>
+    <string name="ai_monitoring_current_page">正在监控当前网页...</string>
+    <string name="ai_monitoring_with_title">监控中: %1$s</string>
+    <string name="ai_thinking">AI 正在思考...</string>
+    <string name="ai_hint_send_message">发送消息给 AI...</string>
+    <string name="ai_msg_hello">你好！我是 Manor AI 助手。\n\n我可以在弹窗模式下直接操作浏览器，查找信息、阅读当前网页。需要我帮你做点什么？</string>
+    <string name="ai_msg_sending_request">发送请求中...</string>
+    <string name="ai_msg_waiting_reply">等待回复...</string>
+    <string name="ai_msg_request_failed">请求失败: HTTP %1$d</string>
+    <string name="ai_msg_thinking">思考中...</string>
+    <string name="ai_msg_running_tool">执行操作: %1$s</string>
+    <string name="ai_msg_received_data">收到页面数据，继续推理...</string>
+    <string name="ai_msg_processing_result">处理页面结果中...</string>
+    <string name="ai_msg_error">发生错误: %1$s</string>
+    <string name="ai_msg_comm_error">通信异常或超时: %1$s</string>
+    <string name="ai_msg_not_connected">未连接：请先在设置中配置 AI 服务器地址并开启开关。</string>
+    <string name="ai_tool_call_label">调用工具: %1$s</string>
+    <string name="action_exit_ai">退出 AI 模式</string>
+    <string name="action_send">发送</string>
+    <string name="msg_ai_started">智能托管已启动</string>
+    <string name="msg_ai_server_unreachable">无法连接到服务器，请检查服务器地址并确保服务器已运行。</string>
+    <string name="copyright_text">© 2026 Olsc</string>
+    <string name="title_reader_settings">阅读设置</string>
+    <string name="password_mask">••••••••</string>
 </resources>

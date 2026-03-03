@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Manor Browser</string>
     <string name="action_search">खोजें या पता टाइप करें</string>
@@ -276,4 +276,48 @@
     <string name="pref_theme_title">प्रदर्शन थीम</string>
     <string name="pref_theme_desc">हल्के और गहरे मोड के बीच स्विच करें</string>
     <string name="action_fullscreen">पूर्णस्क्रीन मोड</string>
+    <string name="title_remote_debugging">रिमोट डीबगिंग</string>
+    <string name="desc_remote_debugging">पायथन के लिए रिमोट कंट्रोल सक्षम करें</string>
+    <string name="msg_remote_debug_restart">रिमोट डीबगिंग सेटिंग पुनरारंभ करने के बाद प्रभावी होगी।</string>
+    <string name="title_remote_control_active">रिमोट कंट्रोल सक्रिय</string>
+    <string name="action_disconnect">डिस्कनेक्ट करें</string>
+    <string name="msg_remote_control_disconnected">रिमोट कंट्रोल डिस्कनेक्ट हो गया</string>
+    <string name="msg_remote_server_started">रिमोट कंट्रोल तैयार: %1$s:%2$d</string>
+    <string name="msg_remote_server_failed">कमांड सर्वर शुरू करने में विफल</string>
+
+    <string name="settings_group_ai_control">इंटेलिजेंट होस्टिंग</string>
+    <string name="title_ai_remote_control">इंटेलिजेंट होस्टिंग</string>
+    <string name="label_ai_server_address">सर्वर पता</string>
+    <string name="hint_ai_server_address">सर्वर पता दर्ज करें</string>
+    <string name="msg_ai_not_configured">कॉन्फ़िगर नहीं किया गया</string>
+    <string name="msg_ai_not_started">शुरू नहीं हुआ</string>
+    <string name="msg_ai_connected">कनेक्टेड (पॉलिंग)</string>
+    <string name="msg_ai_connecting">कनेक्ट करने का प्रयास (विफल)...</string>
+    <string name="msg_ai_config_server_first">कृपया पहले सर्वर पता कॉन्फ़िगर करें</string>
+
+    <!-- AI Overlay / AI Assistant -->
+    <string name="ai_assistant_name">मनोर AI सहायक</string>
+    <string name="ai_monitoring_current_page">वर्तमान पृष्ठ की निगरानी...</string>
+    <string name="ai_monitoring_with_title">निगरानी: %1$s</string>
+    <string name="ai_thinking">AI सोच रहा है...</string>
+    <string name="ai_hint_send_message">AI को संदेश भेजें...</string>
+    <string name="ai_msg_hello">नमस्ते! मैं मनोर AI सहायक हूँ।\n\nमैं सीधे पॉपअप मोड में ब्राउज़र संचालित कर सकता हूँ, जानकारी खोज सकता हूँ और वर्तमान वेब पेज पढ़ सकता हूँ। मैं आपके लिए क्या कर सकता हूँ?</string>
+    <string name="ai_msg_sending_request">अनुरोध भेजा जा रहा है...</string>
+    <string name="ai_msg_waiting_reply">उत्तर की प्रतीक्षा में...</string>
+    <string name="ai_msg_request_failed">अनुरोध विफल: HTTP %1$d</string>
+    <string name="ai_msg_thinking">सोच रहा हूँ...</string>
+    <string name="ai_msg_running_tool">टूल चला रहा हूँ: %1$s</string>
+    <string name="ai_msg_received_data">पृष्ठ डेटा प्राप्त हुआ, अनुमान जारी रखें...</string>
+    <string name="ai_msg_processing_result">पृष्ठ परिणामों को संसाधित कर रहा हूँ...</string>
+    <string name="ai_msg_error">एक त्रुटि हुई: %1$s</string>
+    <string name="ai_msg_comm_error">संचार त्रुटि या टाइमआउट: %1$s</string>
+    <string name="ai_msg_not_connected">कनेक्टेड नहीं है: कृपया सेटिंग्स में AI सर्वर पता कॉन्फ़िगर करें और स्विच चालू करें।</string>
+    <string name="ai_tool_call_label">टूल कॉल: %1$s</string>
+    <string name="action_exit_ai">AI मोड से बाहर निकलें</string>
+    <string name="action_send">भेजें</string>
+    <string name="msg_ai_started">इंटेलिजेंट होस्टिंग शुरू हुई</string>
+    <string name="msg_ai_server_unreachable">सर्वर से कनेक्ट नहीं हो सका। कृपया सर्वर पता जाँचें और सुनिश्चित करें कि सर्वर चल रहा है।</string>
+    <string name="copyright_text">© 2026 Olsc</string>
+    <string name="title_reader_settings">रीडिंग सेटिंग्स</string>
+    <string name="password_mask">••••••••</string>
 </resources>

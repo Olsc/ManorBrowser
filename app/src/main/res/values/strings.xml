@@ -289,13 +289,39 @@ URL: %1$s</string>
     <string name="msg_remote_server_started">Remote Control Ready: %1$s:%2$d</string>
     <string name="msg_remote_server_failed">Failed to start command server</string>
 
-    <string name="settings_group_ai_control">智能托管</string>
-    <string name="title_ai_remote_control">智能托管</string>
-    <string name="label_ai_server_address">服务器地址</string>
-    <string name="hint_ai_server_address">输入服务器地址</string>
-    <string name="msg_ai_not_configured">未配置</string>
-    <string name="msg_ai_not_started">未启动</string>
-    <string name="msg_ai_connected">已连接 (正常轮询中)</string>
-    <string name="msg_ai_connecting">正在尝试连接 (失败)...</string>
-    <string name="msg_ai_config_server_first">请先设置服务器地址</string>
+    <string name="settings_group_ai_control">Intelligent Hosting</string>
+    <string name="title_ai_remote_control">Intelligent Hosting</string>
+    <string name="label_ai_server_address">Server Address</string>
+    <string name="hint_ai_server_address">Enter server address</string>
+    <string name="msg_ai_not_configured">Not Configured</string>
+    <string name="msg_ai_not_started">Not Started</string>
+    <string name="msg_ai_connected">Connected (Polling)</string>
+    <string name="msg_ai_connecting">Connecting (Failed)...</string>
+    <string name="msg_ai_config_server_first">Please configure server address first</string>
+
+    <!-- AI Overlay / AI Assistant -->
+    <string name="ai_assistant_name">Manor AI Assistant</string>
+    <string name="ai_monitoring_current_page">Monitoring current page...</string>
+    <string name="ai_monitoring_with_title">Monitoring: %1$s</string>
+    <string name="ai_thinking">AI is thinking...</string>
+    <string name="ai_hint_send_message">Send message to AI...</string>
+    <string name="ai_msg_hello">Hello! I am Manor AI Assistant.\n\nI can directly operate the browser in popup mode, search for information, and read the current webpage. What can I do for you?</string>
+    <string name="ai_msg_sending_request">Sending request...</string>
+    <string name="ai_msg_waiting_reply">Waiting for reply...</string>
+    <string name="ai_msg_request_failed">Request failed: HTTP %1$d</string>
+    <string name="ai_msg_thinking">Thinking...</string>
+    <string name="ai_msg_running_tool">Running tool: %1$s</string>
+    <string name="ai_msg_received_data">Received page data, continuing inference...</string>
+    <string name="ai_msg_processing_result">Processing page results...</string>
+    <string name="ai_msg_error">An error occurred: %1$s</string>
+    <string name="ai_msg_comm_error">Communication error or timeout: %1$s</string>
+    <string name="ai_msg_not_connected">Not connected: Please configure the AI server address in settings and turn on the switch.</string>
+    <string name="ai_tool_call_label">Calling tool: %1$s</string>
+    <string name="action_exit_ai">Exit AI Mode</string>
+    <string name="action_send">Send</string>
+    <string name="msg_ai_started">Intelligent Hosting started</string>
+    <string name="msg_ai_server_unreachable">Unable to connect to server. Please check the server address and ensure the server is running.</string>
+    <string name="copyright_text">© 2026 Olsc</string>
+    <string name="title_reader_settings">Reader Settings</string>
+    <string name="password_mask">••••••••</string>
 </resources>

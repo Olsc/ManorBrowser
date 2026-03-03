@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Manor Browser</string>
     <string name="action_search">Zoek of typ een adres</string>
@@ -276,4 +276,48 @@
     <string name="pref_theme_title">Weergavethema</string>
     <string name="pref_theme_desc">Schakelen tussen lichte en donkere modus</string>
     <string name="action_fullscreen">Volledig scherm</string>
+    <string name="title_remote_debugging">Foutopsporing op afstand</string>
+    <string name="desc_remote_debugging">Afstandsbediening voor Python inschakelen</string>
+    <string name="msg_remote_debug_restart">De instelling voor foutopsporing op afstand wordt van kracht na het opnieuw opstarten.</string>
+    <string name="title_remote_control_active">Afstandsbediening actief</string>
+    <string name="action_disconnect">Ontkoppelen</string>
+    <string name="msg_remote_control_disconnected">Afstandsbediening ontkoppeld</string>
+    <string name="msg_remote_server_started">Afstandsbediening gereed: %1$s:%2$d</string>
+    <string name="msg_remote_server_failed">Kan commandoserver niet starten</string>
+
+    <string name="settings_group_ai_control">Intelligente Hosting</string>
+    <string name="title_ai_remote_control">Intelligente Hosting</string>
+    <string name="label_ai_server_address">Serveradres</string>
+    <string name="hint_ai_server_address">Voer serveradres in</string>
+    <string name="msg_ai_not_configured">Niet geconfigureerd</string>
+    <string name="msg_ai_not_started">Niet gestart</string>
+    <string name="msg_ai_connected">Verbonden (Polling)</string>
+    <string name="msg_ai_connecting">Verbinding proberen (Mislukt)...</string>
+    <string name="msg_ai_config_server_first">Configureer eerst het serveradres</string>
+
+    <!-- AI Overlay / AI Assistant -->
+    <string name="ai_assistant_name">Manor AI-assistent</string>
+    <string name="ai_monitoring_current_page">Huidige pagina monitoren...</string>
+    <string name="ai_monitoring_with_title">Monitoren: %1$s</string>
+    <string name="ai_thinking">AI denkt na...</string>
+    <string name="ai_hint_send_message">Stuur bericht naar AI...</string>
+    <string name="ai_msg_hello">Hallo! Ik ben de Manor AI-assistent.\n\nIk kan the browser rechtstreeks bedienen in de popup-modus, informatie zoeken en de huidige webpagina lezen. Wat kan ik voor u doen?</string>
+    <string name="ai_msg_sending_request">Verzoek verzenden...</string>
+    <string name="ai_msg_waiting_reply">Wachten op antwoord...</string>
+    <string name="ai_msg_request_failed">Verzoek mislukt: HTTP %1$d</string>
+    <string name="ai_msg_thinking">Nadenken...</string>
+    <string name="ai_msg_running_tool">Tool uitvoeren: %1$s</string>
+    <string name="ai_msg_received_data">Paginagegevens ontvangen, inferentie voortzetten...</string>
+    <string name="ai_msg_processing_result">Paginaresultaten verwerken...</string>
+    <string name="ai_msg_error">Er is een fout opgetreden: %1$s</string>
+    <string name="ai_msg_comm_error">Communicatiefout of time-out: %1$s</string>
+    <string name="ai_msg_not_connected">Niet verbonden: Configureer het AI-serveradres in de instellingen en zet de schakelaar aan.</string>
+    <string name="ai_tool_call_label">Tool aanroepen: %1$s</string>
+    <string name="action_exit_ai">AI-modus verlaten</string>
+    <string name="action_send">Verzenden</string>
+    <string name="msg_ai_started">Intelligente Hosting gestart</string>
+    <string name="msg_ai_server_unreachable">Kan geen verbinding maken met de server. Controleer het serveradres en zorg ervoor dat de server actief is.</string>
+    <string name="copyright_text">© 2026 Olsc</string>
+    <string name="title_reader_settings">Leesinstellingen</string>
+    <string name="password_mask">••••••••</string>
 </resources>

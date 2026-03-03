@@ -700,7 +700,6 @@ public class MainActivity extends AppCompatActivity {
                     String resultData = message.substring("__JSRESULT__:".length());
                     BrowserCommandServer.EvalCallback cb = pendingJsCallback;
                     pendingJsCallback = null;
-                    pendingJsOriginalTitle = null;
                     if (cb != null) {
                         cb.onResult(resultData);
                     }
@@ -1094,7 +1093,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (commandServer != null) {
-            commandServer.stop();
             commandServer = null;
         }
         super.onDestroy();
@@ -2140,7 +2138,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setBarsVisible(boolean visible) {
+    public void setBarsVisible(boolean visible) {
         if (topBar == null || bottomBar == null) return;
         
         // 如果 AI 遮罩正在显示，强制隐藏导航栏和搜索栏，防止在 AI 执行操作（如导航）时被强行显示出来
@@ -2163,6 +2161,10 @@ public class MainActivity extends AppCompatActivity {
         topBar.setVisibility(visible ? View.VISIBLE : View.GONE);
         bottomBar.setVisibility(visible ? View.VISIBLE : View.GONE);
         
+        // 手动请求应用 Insets，确保内容容器的 Padding 能够根据顶栏可见性及时更新，
+        // 从而消除“网页与顶栏之间莫名多出一块空间”的问题。
+        androidx.core.view.ViewCompat.requestApplyInsets(root);
+
         if (fullscreenMenuContainer != null) {
             fullscreenMenuContainer.setVisibility(!visible && isFullScreenMode ? View.VISIBLE : View.GONE);
         }
@@ -2403,184 +2405,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     
-    private boolean isExternalAppLink(String uri) {
-        String[] externalSchemes = {
-            "mailto:",
-            "tel:",
-            "sms:",
-            "market:",
-            "play.google.com",
-            "maps:",
-            "geo:",
-            "youtube:",
-            "twitter:",
-            "facebook:",
-            "instagram:",
-            "whatsapp:",
-            "tg:",
-            "snapchat:",
-            "pinterest:",
-            "linkedin:",
-            "skype:",
-            "slack:",
-            "discord:",
-            "spotify:",
-            "paypal:",
-            "fb-messenger:",
-            "viber:",
-            "telegram:",
-            "signal:",
-            "teams:",
-            "zoomus:",
-            "tiktok:",
-            "twitch:",
-            "etsy:",
-            "ebay:",
-            "amazon:",
-            "netflix:",
-            "primevideo:",
-            "hulu:",
-            "disneyplus:",
-            "apple-music:",
-            "itunes:",
-            "calshow:",
-            "caladd:",
-            "itms-apps:",
-            "itms-books:",
-            "itms-itunes:",
-            "itms-podcasts:",
-            "itms-music:",
-            "google.streetview:",
-            "comgooglemaps:",
-            "comgooglecalendar:",
-            "gmm:",
-            "fb:",
-            "line:",
-            "kakaotalk:",
-            "kakaoplus:",
-            "navermap:",
-            "nmap:",
-            "daummap:",
-            "viki:",
-            "watcha:",
-            "wavve:",
-            "tving:",
-            "genie:",
-            "bugs:",
-            "melon:",
-            "flo:",
-            "yes24:",
-            "aladdin:",
-            "kyobo:",
-            "ridibooks:",
-            "bookcube:",
-            "mangabox:",
-            "cartoon365:",
-            "watchmart:",
-            "auction:",
-            "gmarket:",
-            "11st:",
-            "wemakeprice:",
-            "coupang:",
-            "tmon:",
-            "hottracksonline:",
-            "yes24movie:",
-            "lottecinema:",
-            "megabox:",
-            "cgv:",
-            "watcha-party:",
-            "netmarble:",
-            "com.nhnent.wannaplay:",
-            "com.gamevil.nary:",
-            // 中国区应用
-            "bilibili:",
-            "zhihu:",
-            "csdn:",
-            "weixin:",
-            "wechat:",
-            "alipays:",
-            "alipay:",
-            "taobao:",
-            "tbopen:",
-            "openapp.jdmobile:",
-            "jd:",
-            "snssdk1128:",
-            "douyin:",
-            "mqq:",
-            "mqqapi:",
-            "tim:",
-            "sinaweibo:",
-            "weibo:",
-            "imeituan:",
-            "meituan:",
-            "dianping:",
-            "orpheus:",
-            "neteasemusic:",
-            "fleamarket:",
-            "xianyu:",
-            "youku:",
-            "iqiyi:",
-            "tudou:",
-            "sohuvideo:",
-            "baiduyun:",
-            "baidunetdisk:",
-            "wangpan:",
-            "kwai:",
-            "gifshow:",
-            "pinduoduo:",
-            "pddopen:",
-            "xiaohongshu:",
-            "xhsdiscover:",
-            "qqmusic:",
-            "kugou:",
-            "kuwo:",
-            "baidumap:",
-            "bdapp:",
-            "iosamap:",
-            "androidamap:",
-            "autonavi:"
-        };
-        
-        for (String scheme : externalSchemes) {
-            if (uri.toLowerCase().startsWith(scheme)) {
-                return true;
-            }
-        }
 
-        if (uri.contains("//play.google.com/store/apps/details?id=") ||
-            uri.contains("//play.google.com/store/search?q=") ||
-            uri.contains("//apps.apple.com/") ||
-            uri.contains("//itunes.apple.com/")) {
-            return true;
-        }
-
-        return false;
-    }
-    
-    private void handleExternalAppRedirect(String uri) {
-        runOnUiThread(() -> {
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.title_external_app_redirect)
-                .setMessage(getString(R.string.msg_external_app_redirect, uri))
-                .setPositiveButton(R.string.action_allow, (dialog, which) -> {
-                    try {
-                        android.content.Intent intent = android.content.Intent.parseUri(uri, android.content.Intent.URI_INTENT_SCHEME);
-                        
-                        android.content.pm.PackageManager pm = getPackageManager();
-                        if (intent.resolveActivity(pm) != null) {
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(this, R.string.error_no_app_found, Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (java.net.URISyntaxException e) {
-                        Toast.makeText(this, R.string.error_invalid_uri, Toast.LENGTH_SHORT).show();
-                        e.printStackTrace();
-                    }
-                })
-                .setNegativeButton(R.string.action_deny, null)
-                .show();
-        });
-    }
     private void showTabEditDialog(int position) {
         if (position < 0 || position >= tabs.size()) return;
         
@@ -3049,8 +2874,6 @@ public class MainActivity extends AppCompatActivity {
                     GeckoSession session = getCurrentSession();
                     if (session == null) { callback.onResult("null"); return; }
 
-                    String originalTitle = getCurrentTitle();
-                    pendingJsOriginalTitle = originalTitle;
                     pendingJsCallback = callback;
 
                     // 通过 alert() 传回 JS 结果（解决 document.title 的长度限制问题）

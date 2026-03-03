@@ -11,17 +11,15 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.olsc.manorbrowser.Config;
 import com.olsc.manorbrowser.R;
+import com.olsc.manorbrowser.activity.MainActivity;
 import com.olsc.manorbrowser.adapter.AiChatAdapter;
 
 import org.json.JSONObject;
@@ -36,6 +34,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * AI 覆盖层管理器
+ * 负责管理 AI 助手的 UI 交互、网络通信以及与浏览器核心的协同。
+ */
 public class AiOverlayManager {
     private static final String TAG = "AiOverlayMgr";
 
@@ -48,7 +50,6 @@ public class AiOverlayManager {
     private AiChatAdapter chatAdapter;
     private EditText etInput;
     private ImageButton btnSend;
-    private TextView tvStatusText;
     private View btnExit;
     private TextView tvCurrentPage;
     private View aiStatusDot;
@@ -71,6 +72,9 @@ public class AiOverlayManager {
         networkExecutor = Executors.newSingleThreadExecutor();
     }
 
+    /**
+     * 初始化视图组件
+     */
     private void initViews() {
         rvChat = rootOverlay.findViewById(R.id.rv_ai_chat);
         etInput = rootOverlay.findViewById(R.id.et_ai_input);
@@ -89,10 +93,11 @@ public class AiOverlayManager {
         rvChat.setAdapter(chatAdapter);
 
         // 彻底解决 AI 输出文本时气泡乱闪、动画“打架”的问题
+        // 在流式输出频繁刷新时，禁用动画是最高效的方案
         if (rvChat.getItemAnimator() instanceof androidx.recyclerview.widget.SimpleItemAnimator) {
             ((androidx.recyclerview.widget.SimpleItemAnimator) rvChat.getItemAnimator()).setSupportsChangeAnimations(false);
         }
-        rvChat.setItemAnimator(null); // 在流式输出频繁刷新时，禁用动画是最高效的方案
+        rvChat.setItemAnimator(null);
 
         // 处理键盘弹出和系统状态栏避让
         // 将内边距应用到内容容器而非根节点，使背景 View 能填满整个屏幕（包括状态栏）
@@ -104,12 +109,15 @@ public class AiOverlayManager {
         });
     }
 
+    /**
+     * 设置事件监听器
+     */
     private void setupListeners() {
         btnExit.setOnClickListener(v -> {
             if (aiClient != null) {
                 aiClient.stop();
             }
-            activity.getSharedPreferences(com.olsc.manorbrowser.Config.PREFERENCE_NAME, android.content.Context.MODE_PRIVATE)
+            activity.getSharedPreferences(com.olsc.manorbrowser.Config.PREF_NAME_THEME, android.content.Context.MODE_PRIVATE)
                     .edit()
                     .putBoolean(com.olsc.manorbrowser.Config.PREF_KEY_AI_REMOTE_ENABLED, false)
                     .apply();
@@ -128,57 +136,62 @@ public class AiOverlayManager {
         });
     }
 
+    /**
+     * 显示 AI 覆盖层
+     */
     public void show() {
         if (rootOverlay.getVisibility() != View.VISIBLE) {
             rootOverlay.setVisibility(View.VISIBLE);
-            setBarsVisibility(View.GONE);
+            if (activity instanceof MainActivity) {
+                ((MainActivity) activity).setBarsVisible(false);
+            }
             if (chatAdapter.getItemCount() == 0) {
-                chatAdapter.addMessage(AiChatAdapter.ChatMessage.aiMsg("你好！我是 Manor AI 助手。\n\n我可以在弹窗模式下直接操作浏览器，查找信息、阅读当前网页。需要我帮你做点什么？"));
+                chatAdapter.addMessage(AiChatAdapter.ChatMessage.aiMsg(activity.getString(R.string.ai_msg_hello)));
             }
         }
         updateStatus();
     }
 
-    private void setBarsVisibility(int visibility) {
-        View topBar = activity.findViewById(R.id.top_bar);
-        View bottomBar = activity.findViewById(R.id.bottom_bar);
-        View progressBar = activity.findViewById(R.id.progress_bar);
-        if (topBar != null) topBar.setVisibility(visibility);
-        if (bottomBar != null) bottomBar.setVisibility(visibility);
-        if (progressBar != null) {
-            if (visibility == View.GONE) progressBar.setVisibility(View.GONE);
-            // else let the normal logic decide progress bar visibility
+
+
+    /**
+     * 隐藏 AI 覆盖层
+     */
+    public void hide() {
+        rootOverlay.setVisibility(View.GONE);
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).setBarsVisible(true);
         }
     }
 
-    public void hide() {
-        rootOverlay.setVisibility(View.GONE);
-        setBarsVisibility(View.VISIBLE);
-    }
-
+    /**
+     * 更新 AI 状态及当前页面标题
+     */
     public void updateStatus() {
-        String url = aiClient.getServerUrl();
         boolean running = aiClient.isRunning();
         
         mainHandler.post(() -> {
             if (running) {
                 aiStatusDot.setBackgroundResource(R.drawable.shape_ai_status_dot);
             } else {
-                // offline
+                // 离线状态
                 aiStatusDot.setBackgroundColor(android.graphics.Color.GRAY);
             }
 
             try {
                 String title = handler.getCurrentTitle();
                 if (title != null && !title.isEmpty()) {
-                    tvCurrentPage.setText("监控中: " + title);
+                    tvCurrentPage.setText(activity.getString(R.string.ai_monitoring_with_title, title));
                 } else {
-                    tvCurrentPage.setText("监控当前网页中...");
+                    tvCurrentPage.setText(activity.getString(R.string.ai_monitoring_current_page));
                 }
             } catch (Exception e) {}
         });
     }
 
+    /**
+     * 发送消息给 AI
+     */
     private void sendMessage() {
         if (isRequesting) return;
         String text = etInput.getText().toString().trim();
@@ -188,19 +201,19 @@ public class AiOverlayManager {
         isRequesting = true;
         btnSend.setEnabled(false);
 
-        // Add user msg
+        // 添加用户消息
         chatAdapter.addMessage(AiChatAdapter.ChatMessage.userMsg(text));
         
-        // Add pending AI msg
-        chatAdapter.addMessage(AiChatAdapter.ChatMessage.aiThinking("发送请求中..."));
+        // 添加待处理的 AI 消息
+        chatAdapter.addMessage(AiChatAdapter.ChatMessage.aiThinking(activity.getString(R.string.ai_msg_sending_request)));
         rvChat.smoothScrollToPosition(chatAdapter.getItemCount() - 1);
 
         thinkingBar.setVisibility(View.VISIBLE);
-        tvThinkingBarText.setText("AI 正在思考...");
+        tvThinkingBarText.setText(activity.getString(R.string.ai_thinking));
 
         String baseUrl = aiClient.getServerUrl();
         if (baseUrl == null || baseUrl.isEmpty()) {
-            chatAdapter.updateLastAiMessage("未连接：请先在设置中配置 AI 服务器地址并开启开关。");
+            chatAdapter.updateLastAiMessage(activity.getString(R.string.ai_msg_not_connected));
             finishRequest();
             return;
         }
@@ -211,7 +224,7 @@ public class AiOverlayManager {
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setConnectTimeout(10000);
-                conn.setReadTimeout(120000); // 长时间等待 EventStream
+                conn.setReadTimeout(120000); // 长时间等待事件流 (EventStream)
                 conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
 
@@ -222,11 +235,11 @@ public class AiOverlayManager {
                     os.write(payload.toString().getBytes(StandardCharsets.UTF_8));
                 }
 
-                mainHandler.post(() -> chatAdapter.updateLastAiStatus("等待回复..."));
+                mainHandler.post(() -> chatAdapter.updateLastAiStatus(activity.getString(R.string.ai_msg_waiting_reply)));
 
                 int code = conn.getResponseCode();
                 if (code != 200) {
-                    mainHandler.post(() -> chatAdapter.updateLastAiMessage("请求失败: HTTP " + code));
+                    mainHandler.post(() -> chatAdapter.updateLastAiMessage(activity.getString(R.string.ai_msg_request_failed, code)));
                     finishRequest();
                     return;
                 }
@@ -248,7 +261,7 @@ public class AiOverlayManager {
 
                             mainHandler.post(() -> {
                                 if ("thinking".equals(type)) {
-                                    chatAdapter.updateLastAiStatus(data.optString("content", "思考中..."));
+                                    chatAdapter.updateLastAiStatus(data.optString("content", activity.getString(R.string.ai_msg_thinking)));
                                 } 
                                 else if ("content".equals(type)) {
                                     chatAdapter.updateLastAiStatus(null);
@@ -260,16 +273,16 @@ public class AiOverlayManager {
                                 } 
                                 else if ("tool_start".equals(type)) {
                                     String toolName = data.optString("name");
-                                    chatAdapter.updateLastAiToolCall("调用工具: " + toolName);
-                                    tvThinkingBarText.setText("执行操作: " + toolName);
+                                    chatAdapter.updateLastAiToolCall(activity.getString(R.string.ai_tool_call_label, toolName));
+                                    tvThinkingBarText.setText(activity.getString(R.string.ai_msg_running_tool, toolName));
                                 } 
                                 else if ("tool_result".equals(type)) {
                                     chatAdapter.updateLastAiToolCall(null);
-                                    tvThinkingBarText.setText("收到页面数据，继续推理...");
-                                    chatAdapter.updateLastAiStatus("处理页面结果中...");
+                                    tvThinkingBarText.setText(activity.getString(R.string.ai_msg_received_data));
+                                    chatAdapter.updateLastAiStatus(activity.getString(R.string.ai_msg_processing_result));
                                 } 
                                 else if ("error".equals(type)) {
-                                    chatAdapter.updateLastAiMessage("发生错误: " + data.optString("message"));
+                                    chatAdapter.updateLastAiMessage(activity.getString(R.string.ai_msg_error, data.optString("message")));
                                 } 
                                 else if ("done".equals(type)) {
                                     chatAdapter.finalizeLastAiMessage();
@@ -278,21 +291,24 @@ public class AiOverlayManager {
                             });
 
                         } catch (Exception e) {
-                            Log.e(TAG, "SSE parse json error: " + dataStr, e);
+                            Log.e(TAG, "SSE 解析 JSON 失败: " + dataStr, e);
                         }
                     }
                 }
                 reader.close();
 
             } catch (Exception e) {
-                Log.e(TAG, "SSE error", e);
-                mainHandler.post(() -> chatAdapter.updateLastAiMessage("通信异常或超时: " + e.getMessage()));
+                Log.e(TAG, "SSE 通信错误", e);
+                mainHandler.post(() -> chatAdapter.updateLastAiMessage(activity.getString(R.string.ai_msg_comm_error, e.getMessage())));
             }
 
             finishRequest();
         });
     }
 
+    /**
+     * 完成请求后的清理工作
+     */
     private void finishRequest() {
         mainHandler.post(() -> {
             isRequesting = false;
@@ -302,3 +318,4 @@ public class AiOverlayManager {
         });
     }
 }
+

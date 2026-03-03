@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Manor Browser</string>
     <string name="action_search">Cari atau masukkan alamat</string>
@@ -276,4 +276,48 @@
     <string name="pref_theme_title">Tema Tampilan</string>
     <string name="pref_theme_desc">Beralih antara mode terang dan gelap</string>
     <string name="action_fullscreen">Mode Layar Penuh</string>
+    <string name="title_remote_debugging">Debugging Jarak Jauh</string>
+    <string name="desc_remote_debugging">Aktifkan kontrol jarak jauh untuk Python</string>
+    <string name="msg_remote_debug_restart">Pengaturan debugging jarak jauh akan berlaku setelah memulai ulang.</string>
+    <string name="title_remote_control_active">Kontrol Jarak Jauh Aktif</string>
+    <string name="action_disconnect">Putuskan Sambungan</string>
+    <string name="msg_remote_control_disconnected">Kontrol jarak jauh terputus</string>
+    <string name="msg_remote_server_started">Kontrol jarak jauh siap: %1$s:%2$d</string>
+    <string name="msg_remote_server_failed">Gagal memulai server perintah</string>
+
+    <string name="settings_group_ai_control">Hosting Cerdas</string>
+    <string name="title_ai_remote_control">Hosting Cerdas</string>
+    <string name="label_ai_server_address">Alamat Server</string>
+    <string name="hint_ai_server_address">Masukkan alamat server</string>
+    <string name="msg_ai_not_configured">Tidak Dikonfigurasi</string>
+    <string name="msg_ai_not_started">Tidak Dimulai</string>
+    <string name="msg_ai_connected">Terhubung (Polling)</string>
+    <string name="msg_ai_connecting">Mencoba Terhubung (Gagal)...</string>
+    <string name="msg_ai_config_server_first">Harap konfigurasikan alamat server terlebih dahulu</string>
+
+    <!-- AI Overlay / AI Assistant -->
+    <string name="ai_assistant_name">Asisten AI Manor</string>
+    <string name="ai_monitoring_current_page">Memantau halaman saat ini...</string>
+    <string name="ai_monitoring_with_title">Memantau: %1$s</string>
+    <string name="ai_thinking">AI sedang berpikir...</string>
+    <string name="ai_hint_send_message">Kirim pesan ke AI...</string>
+    <string name="ai_msg_hello">Halo! Saya Asisten AI Manor.\n\nSaya dapat mengoperasikan browser secara langsung dalam mode popup, mencari informasi, dan membaca halaman web saat ini. Apa yang bisa saya bantu?</string>
+    <string name="ai_msg_sending_request">Mengirimkan permintaan...</string>
+    <string name="ai_msg_waiting_reply">Menunggu jawaban...</string>
+    <string name="ai_msg_request_failed">Permintaan gagal: HTTP %1$d</string>
+    <string name="ai_msg_thinking">Berpikir...</string>
+    <string name="ai_msg_running_tool">Menjalankan alat: %1$s</string>
+    <string name="ai_msg_received_data">Data halaman diterima, melanjutkan inferensi...</string>
+    <string name="ai_msg_processing_result">Memproses hasil halaman...</string>
+    <string name="ai_msg_error">Terjadi kesalahan: %1$s</string>
+    <string name="ai_msg_comm_error">Kesalahan komunikasi atau habis waktu: %1$s</string>
+    <string name="ai_msg_not_connected">Tidak terhubung: Harap konfigurasikan alamat server AI di pengaturan dan nyalakan sakelar.</string>
+    <string name="ai_tool_call_label">Memanggil alat: %1$s</string>
+    <string name="action_exit_ai">Keluar dari Mode AI</string>
+    <string name="action_send">Kirim</string>
+    <string name="msg_ai_started">Hosting Cerdas dimulai</string>
+    <string name="msg_ai_server_unreachable">Tidak dapat terhubung ke server. Harap periksa alamat server dan pastikan server sedang berjalan.</string>
+    <string name="copyright_text">© 2026 Olsc</string>
+    <string name="title_reader_settings">Pengaturan Membaca</string>
+    <string name="password_mask">••••••••</string>
 </resources>
