@@ -270,4 +270,11 @@
     <string name="action_update">갱신</string>
     <string name="msg_update_password">%1$s의 암호를 갱신하시겠습니까?</string>
     <string name="title_update_password">암호갱신?</string>
+    <string name="settings_group_general">일반</string>
+    <string name="settings_group_personalization">개인화</string>
+    <string name="settings_group_privacy">개인정보 및 보안</string>
+    <string name="settings_group_about">정보</string>
+    <string name="pref_theme_title">화면 테마</string>
+    <string name="pref_theme_desc">밝은 모드와 어두운 모드 사이를 전환</string>
+    <string name="action_fullscreen">전체 화면 모드</string>
 </resources>

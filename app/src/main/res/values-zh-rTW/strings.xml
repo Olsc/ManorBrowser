@@ -268,4 +268,11 @@
     <string name="action_update">更新</string>
     <string name="msg_update_password">是否更新 %1$s 的密碼？</string>
     <string name="title_update_password">更新密碼？</string>
+    <string name="action_fullscreen">全螢幕模式</string>
+    <string name="settings_group_general">一般設定</string>
+    <string name="settings_group_personalization">個人化</string>
+    <string name="settings_group_privacy">隱私與安全</string>
+    <string name="settings_group_about">關於</string>
+    <string name="pref_theme_title">顯示主題</string>
+    <string name="pref_theme_desc">在白天與夜間模式之間切換</string>
 </resources>

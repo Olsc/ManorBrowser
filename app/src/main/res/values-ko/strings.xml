@@ -270,4 +270,11 @@
     <string name="action_update">업데이트</string>
     <string name="msg_update_password">%1$s의 비밀번호를 업데이트하시겠습니까?</string>
     <string name="title_update_password">비밀번호 업데이트?</string>
+    <string name="action_fullscreen">전체 화면 모드</string>
+    <string name="settings_group_general">일반</string>
+    <string name="settings_group_personalization">개인 설정</string>
+    <string name="settings_group_privacy">개인정보 및 보안</string>
+    <string name="settings_group_about">정보</string>
+    <string name="pref_theme_title">디스플레이 테마</string>
+    <string name="pref_theme_desc">라이트 모드와 다크 모드 전환</string>
 </resources>

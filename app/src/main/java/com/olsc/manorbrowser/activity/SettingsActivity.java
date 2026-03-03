@@ -114,7 +114,46 @@ public class SettingsActivity extends AppCompatActivity {
             containerCustomHomeButton.setOnClickListener(v -> showCustomHomeButtonDialog());
             updateCurrentHomeButtonText();
         }
+
+        // 白天黑夜模式
+        View containerTheme = findViewById(R.id.container_theme_switch);
+        androidx.appcompat.widget.SwitchCompat switchDarkMode = findViewById(R.id.switch_dark_mode);
+        if (containerTheme != null && switchDarkMode != null) {
+            SharedPreferences themePrefs = getSharedPreferences(Config.PREF_NAME_THEME, MODE_PRIVATE);
+            boolean isDark = themePrefs.getBoolean(Config.PREF_KEY_DARK_MODE, false);
+            switchDarkMode.setChecked(isDark);
+            
+            containerTheme.setOnClickListener(v -> {
+                boolean nextMode = !switchDarkMode.isChecked();
+                switchDarkMode.setChecked(nextMode);
+                toggleTheme(themePrefs, nextMode);
+            });
+        }
+
+        // 密码管理
+        View containerPasswords = findViewById(R.id.container_passwords);
+        if (containerPasswords != null) {
+            containerPasswords.setOnClickListener(v -> {
+                startActivity(new android.content.Intent(this, PasswordManagerActivity.class));
+            });
+        }
+
+        // Cookies管理
+        View containerCookies = findViewById(R.id.container_cookies);
+        if (containerCookies != null) {
+            containerCookies.setOnClickListener(v -> {
+                startActivity(new android.content.Intent(this, CookieManagerActivity.class));
+            });
+        }
     }
+
+    private void toggleTheme(SharedPreferences themePrefs, boolean isDarkMode) {
+        themePrefs.edit().putBoolean(Config.PREF_KEY_DARK_MODE, isDarkMode).apply();
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(isDarkMode ? 
+            androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES : androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
+        recreate();
+    }
+
     
     private void requestDefaultBrowserRole() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {

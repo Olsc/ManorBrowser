@@ -269,4 +269,11 @@
     <string name="action_update">Güncelle</string>
     <string name="msg_update_password">%1$s için şifreyi güncellemek istiyor musunuz?</string>
     <string name="title_update_password">Şifreyi Güncelle?</string>
+    <string name="settings_group_general">Genel</string>
+    <string name="settings_group_personalization">Kişiselleştirme</string>
+    <string name="settings_group_privacy">Gizlilik ve Güvenlik</string>
+    <string name="settings_group_about">Hakkında</string>
+    <string name="pref_theme_title">Görüntü Teması</string>
+    <string name="pref_theme_desc">Açık ve karanlık modlar arasında geçiş yapın</string>
+    <string name="action_fullscreen">Tam Ekran Modu</string>
 </resources>

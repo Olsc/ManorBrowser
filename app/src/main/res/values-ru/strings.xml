@@ -269,4 +269,11 @@
     <string name="action_update">Обновить</string>
     <string name="msg_update_password">Обновить пароль для %1$s?</string>
     <string name="title_update_password">Обновить пароль?</string>
+    <string name="settings_group_general">Общие</string>
+    <string name="settings_group_personalization">Персонализация</string>
+    <string name="settings_group_privacy">Конфиденциальность и безопасность</string>
+    <string name="settings_group_about">О приложении</string>
+    <string name="pref_theme_title">Тема экрана</string>
+    <string name="pref_theme_desc">Переключение между светлым и тёмным режимами</string>
+    <string name="action_fullscreen">Полноэкранный режим</string>
 </resources>

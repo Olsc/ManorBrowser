@@ -4,12 +4,10 @@
  */
 package com.olsc.manorbrowser.utils;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -18,6 +16,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import com.olsc.manorbrowser.R;
@@ -27,12 +26,14 @@ import com.olsc.manorbrowser.data.DownloadStorage;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class BrowserDownloader {
@@ -74,9 +75,11 @@ public class BrowserDownloader {
 
             // 2. 增强 SSL 兼容性（局域网很多是自签名证书）
             try {
-                final javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[]{
+                @SuppressLint("CustomX509TrustManager") final javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[]{
                     new javax.net.ssl.X509TrustManager() {
+                        @SuppressLint("TrustAllX509TrustManager")
                         @Override public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
+                        @SuppressLint("TrustAllX509TrustManager")
                         @Override public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
                         @Override public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[]{}; }
                     }
@@ -90,7 +93,7 @@ public class BrowserDownloader {
             }
 
             // 3. 局域网服务器往往不支持 HTTP/2，强制使用 HTTP/1.1 提高兼容性
-            builder.protocols(java.util.Arrays.asList(okhttp3.Protocol.HTTP_1_1));
+            builder.protocols(List.of(Protocol.HTTP_1_1));
 
             client = builder.build();
         }
@@ -140,11 +143,9 @@ public class BrowserDownloader {
         );
 
         NotificationManager notificationManager = (NotificationManager) appContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    appContext.getString(R.string.action_downloads), NotificationManager.IMPORTANCE_LOW);
-            notificationManager.createNotificationChannel(channel);
-        }
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                appContext.getString(R.string.action_downloads), NotificationManager.IMPORTANCE_LOW);
+        notificationManager.createNotificationChannel(channel);
 
         final long taskId = System.currentTimeMillis();
         final com.olsc.manorbrowser.data.DownloadInfo downloadInfo =
@@ -273,14 +274,12 @@ public class BrowserDownloader {
         NotificationManager notificationManager = (NotificationManager) appContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
         // 创建通知渠道 (Android 8.0+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    appContext.getString(R.string.action_downloads),
-                    NotificationManager.IMPORTANCE_LOW
-            );
-            notificationManager.createNotificationChannel(channel);
-        }
+        NotificationChannel channel = new NotificationChannel(
+                CHANNEL_ID,
+                appContext.getString(R.string.action_downloads),
+                NotificationManager.IMPORTANCE_LOW
+        );
+        notificationManager.createNotificationChannel(channel);
 
         // 初始化任务追踪对象，供下载管理界面使用
         final long taskId = System.currentTimeMillis();
@@ -321,7 +320,7 @@ public class BrowserDownloader {
         // 开始异步网络请求
         call.enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, java.io.IOException e) {
+            public void onFailure(@NonNull Call call, @NonNull java.io.IOException e) {
                 activeCalls.remove(taskId);
                 if (call.isCanceled()) return; // 若是手动取消则不报错
 
@@ -338,8 +337,9 @@ public class BrowserDownloader {
                         Toast.makeText(appContext, appContext.getString(R.string.msg_download_failed, filename), Toast.LENGTH_SHORT).show());
             }
 
+            @SuppressLint("Recycle")
             @Override
-            public void onResponse(Call call, Response response) throws java.io.IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws java.io.IOException {
                 activeCalls.remove(taskId);
                 if (call.isCanceled()) {
                     response.close();
@@ -410,8 +410,6 @@ public class BrowserDownloader {
                         os = new FileOutputStream(legacyFile);
                         downloadInfo.filePath = legacyFile.getAbsolutePath();
                     }
-
-                    if (os == null) throw new java.io.IOException("Failed to create file output stream");
 
                     try (InputStream is = response.body().byteStream();
                          java.io.OutputStream fos = os) {
@@ -509,20 +507,7 @@ public class BrowserDownloader {
      * 处理下载完成后的 Firefox 扩展安装
      */
     private static void handleExtensionInstall(Context appContext, File outputFile, String filename) {
-        java.io.File tempDir = new java.io.File(appContext.getCacheDir(), "extensions");
-        if (!tempDir.exists()) tempDir.mkdirs();
-        tempDir.setExecutable(true, false);
-        tempDir.setReadable(true, false);
-        java.io.File tempFile = new java.io.File(tempDir, filename);
-
-        try (java.io.InputStream in = new java.io.FileInputStream(outputFile);
-             java.io.FileOutputStream out = new java.io.FileOutputStream(tempFile)) {
-            // 将文件拷贝到内部缓存，以解决权限问题
-            byte[] buf = new byte[8192];
-            int len;
-            while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
-            tempFile.setReadable(true, false);
-        } catch (Exception ignored) { }
+        File tempFile = getFile(appContext, outputFile, filename);
 
         // 调用 GeckoView 运行时的扩展控制器进行安装
         if (MainActivity.sRuntime != null) {
@@ -544,5 +529,25 @@ public class BrowserDownloader {
                 }
             });
         }
+    }
+
+    @SuppressLint("SetWorldReadable")
+    @NonNull
+    private static File getFile(Context appContext, File outputFile, String filename) {
+        File tempDir = new File(appContext.getCacheDir(), "extensions");
+        if (!tempDir.exists()) tempDir.mkdirs();
+        tempDir.setExecutable(true, false);
+        tempDir.setReadable(true, false);
+        File tempFile = new File(tempDir, filename);
+
+        try (InputStream in = new java.io.FileInputStream(outputFile);
+             FileOutputStream out = new FileOutputStream(tempFile)) {
+            // 将文件拷贝到内部缓存，以解决权限问题
+            byte[] buf = new byte[8192];
+            int len;
+            while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+            tempFile.setReadable(true, false);
+        } catch (Exception ignored) { }
+        return tempFile;
     }
 }

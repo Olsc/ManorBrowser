@@ -271,4 +271,11 @@ URL: %1$s</string>
     <string name="func_desktop_mode">桌面模式</string>
     <string name="func_add_bookmark">收藏当前页面</string>
     <string name="func_theme">白天/夜间模式</string>
+    <string name="settings_group_general">常规设置</string>
+    <string name="settings_group_personalization">个性化</string>
+    <string name="settings_group_privacy">隐私与安全</string>
+    <string name="settings_group_about">关于</string>
+    <string name="pref_theme_title">显示主题</string>
+    <string name="pref_theme_desc">在白天与夜间模式之间切换</string>
+    <string name="action_fullscreen">全屏模式</string>
 </resources>

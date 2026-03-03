@@ -269,4 +269,11 @@
     <string name="action_update">Cập nhật</string>
     <string name="msg_update_password">Bạn có muốn cập nhật mật khẩu cho %1$s không?</string>
     <string name="title_update_password">Cập nhật mật khẩu?</string>
+    <string name="settings_group_general">Chung</string>
+    <string name="settings_group_personalization">Cá nhân hóa</string>
+    <string name="settings_group_privacy">Quyền riêng tư và Bảo mật</string>
+    <string name="settings_group_about">Giới thiệu</string>
+    <string name="pref_theme_title">Chủ đề hiển thị</string>
+    <string name="pref_theme_desc">Chuyển đổi giữa chế độ sáng và tối</string>
+    <string name="action_fullscreen">Chế độ toàn màn hình</string>
 </resources>

@@ -269,4 +269,11 @@
     <string name="action_update">Bijwerken</string>
     <string name="msg_update_password">Wilt u het wachtwoord voor %1$s bijwerken?</string>
     <string name="title_update_password">Wachtwoord bijwerken?</string>
+    <string name="settings_group_general">Algemeen</string>
+    <string name="settings_group_personalization">Personalisatie</string>
+    <string name="settings_group_privacy">Privacy en Beveiliging</string>
+    <string name="settings_group_about">Over</string>
+    <string name="pref_theme_title">Weergavethema</string>
+    <string name="pref_theme_desc">Schakelen tussen lichte en donkere modus</string>
+    <string name="action_fullscreen">Volledig scherm</string>
 </resources>

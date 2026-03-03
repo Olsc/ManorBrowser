@@ -1,5 +1,6 @@
 package com.olsc.manorbrowser.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import java.io.File;
@@ -8,6 +9,7 @@ import java.io.InputStream;
 
 public class FileUtil {
 
+    @SuppressLint("SetWorldReadable")
     public static File copyContentUriToTempFile(Context context, Uri uri, String filename) {
         try {
             InputStream is = context.getContentResolver().openInputStream(uri);

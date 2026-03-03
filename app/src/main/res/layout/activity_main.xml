@@ -79,6 +79,7 @@
             android:elevation="6dp" />
 
         <FrameLayout
+            android:id="@+id/content_container"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@id/bottom_bar"
@@ -205,8 +206,41 @@
                 android:src="@drawable/ic_menu"
                 android:contentDescription="@string/desc_menu"
                 app:tint="@color/icon_main" />
-
         </LinearLayout>
+
+        <!-- Full Screen Floating Menu -->
+        <FrameLayout
+            android:id="@+id/fullscreen_menu_container"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="80dp"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_fullscreen_handle"
+                android:clickable="false"
+                android:focusable="false"
+                android:elevation="12dp" />
+
+            <ImageButton
+                android:id="@+id/btn_fullscreen_menu"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_menu"
+                android:clickable="false"
+                android:focusable="false"
+                android:elevation="13dp"
+                app:tint="#FFFFFF" />
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

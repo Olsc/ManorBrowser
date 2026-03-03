@@ -260,4 +260,11 @@
     <string name="action_update">Aktualisieren</string>
     <string name="msg_update_password">Möchten Sie das Passwort für %1$s aktualisieren?</string>
     <string name="title_update_password">Passwort aktualisieren?</string>
+    <string name="settings_group_general">Allgemein</string>
+    <string name="settings_group_personalization">Personalisierung</string>
+    <string name="settings_group_privacy">Datenschutz &amp; Sicherheit</string>
+    <string name="settings_group_about">Über</string>
+    <string name="pref_theme_title">Anzeigedesign</string>
+    <string name="pref_theme_desc">Zwischen hellem und dunklem Modus wechseln</string>
+    <string name="action_fullscreen">Vollbildmodus</string>
 </resources>

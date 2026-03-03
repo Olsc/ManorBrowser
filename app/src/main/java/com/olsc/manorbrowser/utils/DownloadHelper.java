@@ -11,14 +11,12 @@ import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 
 import com.olsc.manorbrowser.R;
 import com.olsc.manorbrowser.data.DownloadInfo;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +30,8 @@ public class DownloadHelper {
      * 开始下载任务
      * 根据设置分发给系统下载器或浏览器内置下载器。
      */
-    public static long startDownload(Context context, String url, String userAgent, String contentDisposition, String mimeType, String cookie, String referer) {
-        if (TextUtils.isEmpty(url)) return -1;
+    public static void startDownload(Context context, String url, String userAgent, String contentDisposition, String mimeType, String cookie, String referer) {
+        if (TextUtils.isEmpty(url)) return;
 
         // 获取用户偏好：是否使用系统下载器（默认设为 false，推荐使用内置下载器）
         android.content.SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
@@ -41,30 +39,28 @@ public class DownloadHelper {
 
         if (!useSystemDownloader) {
             // 使用浏览器内置下载器
-            return startBrowserDownload(context, url, userAgent, contentDisposition, mimeType, cookie, referer);
+            startBrowserDownload(context, url, userAgent, contentDisposition, mimeType, cookie, referer);
         } else {
             // 使用系统内置下载管理器 (DownloadManager)
-            return startSystemDownload(context, url, userAgent, contentDisposition, mimeType, cookie, referer);
+            startSystemDownload(context, url, userAgent, contentDisposition, mimeType, cookie, referer);
         }
     }
 
     /**
      * 调用浏览器内置下载器逻辑
      */
-    private static long startBrowserDownload(Context context, String url, String userAgent, String contentDisposition, String mimeType, String cookie, String referer) {
+    private static void startBrowserDownload(Context context, String url, String userAgent, String contentDisposition, String mimeType, String cookie, String referer) {
         String filename = guessFileName(url, contentDisposition, mimeType);
         // 内置下载器直接开始，不弹出重复警告，由其内部处理同名覆盖/重命名
         BrowserDownloader.download(context, url, userAgent, cookie, referer, filename);
-        return 0;
     }
 
     /**
      * 使用 Android 系统下载器开始下载
      */
-    private static long startSystemDownload(Context context, String url, String userAgent, String contentDisposition, String mimeType, String cookie, String referer) {
+    private static void startSystemDownload(Context context, String url, String userAgent, String contentDisposition, String mimeType, String cookie, String referer) {
         String filename = guessFileName(url, contentDisposition, mimeType);
         performDownload(context, url, userAgent, contentDisposition, mimeType, cookie, referer, filename);
-        return 0;
     }
 
     /**

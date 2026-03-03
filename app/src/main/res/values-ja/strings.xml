@@ -269,4 +269,11 @@
     <string name="action_update">更新</string>
     <string name="msg_update_password">%1$s のパスワードを更新しますか？</string>
     <string name="title_update_password">パスワードを更新しますか？</string>
+    <string name="settings_group_general">一般</string>
+    <string name="settings_group_personalization">カスタマイズ</string>
+    <string name="settings_group_privacy">プライバシーとセキュリティ</string>
+    <string name="settings_group_about">このアプリについて</string>
+    <string name="pref_theme_title">表示テーマ</string>
+    <string name="pref_theme_desc">ライトモードとダークモードを切り替える</string>
+    <string name="action_fullscreen">全画面モード</string>
 </resources>

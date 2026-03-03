@@ -30,10 +30,8 @@ public class AboutActivity extends AppCompatActivity {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        if (controller != null) {
-            controller.setAppearanceLightStatusBars(!isDarkMode);
-            controller.setAppearanceLightNavigationBars(!isDarkMode);
-        }
+        controller.setAppearanceLightStatusBars(!isDarkMode);
+        controller.setAppearanceLightNavigationBars(!isDarkMode);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
         View mainView = findViewById(android.R.id.content);
@@ -94,13 +92,7 @@ public class AboutActivity extends AppCompatActivity {
     private String getGeckoViewVersion() {
         try {
             // 从 GeckoView BuildConfig 获取版本信息
-            String fullVersion = BuildConfig.MOZ_APP_VERSION;
-            if (fullVersion != null && !fullVersion.isEmpty()) {
-                return fullVersion;
-            } else {
-                // 如果无法获取完整版本，尝试从 GeckoView 类获取一些信息
-                return "GeckoView";
-            }
+            return BuildConfig.MOZ_APP_VERSION;
         } catch (Exception e) {
             // 如果无法获取 GeckoView 版本，则返回编译时的版本号
             return getString(R.string.default_gecko_version); // fallback

@@ -14,7 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 public class ExtensionPromptDelegate implements WebExtensionController.PromptDelegate {
-    private Context context;
+    private final Context context;
 
     public ExtensionPromptDelegate(Context context) {
         this.context = context;

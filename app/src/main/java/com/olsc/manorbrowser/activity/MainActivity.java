@@ -18,7 +18,7 @@ import com.olsc.manorbrowser.data.TabStorage;
 import com.olsc.manorbrowser.data.HistoryStorage;
 import com.olsc.manorbrowser.utils.SearchHelper;
 
-import android.text.TextUtils;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -40,6 +40,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.WindowInsetsControllerCompat;
+import android.view.HapticFeedbackConstants;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -51,19 +54,16 @@ import org.mozilla.geckoview.GeckoSessionSettings;
 import org.mozilla.geckoview.GeckoView;
 import org.mozilla.geckoview.WebResponse;
 import org.mozilla.geckoview.GeckoSession.ContentDelegate.ContextElement;
-import org.mozilla.geckoview.GeckoSession.NavigationDelegate.LoadRequest;
 import org.mozilla.geckoview.AllowOrDeny;
 
 import org.mozilla.geckoview.Autocomplete;
 import org.mozilla.geckoview.Autocomplete.LoginEntry;
-import org.mozilla.geckoview.Autocomplete.LoginSaveOption;
-import org.mozilla.geckoview.Autocomplete.LoginSelectOption;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import android.view.LayoutInflater;
+
 import android.view.ViewGroup;
-import android.widget.ImageView;
+
 import com.olsc.manorbrowser.data.PasswordItem;
 import com.olsc.manorbrowser.data.PasswordStorage;
 
@@ -71,10 +71,7 @@ import androidx.preference.PreferenceManager;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
-import android.net.Uri;
 import org.mozilla.geckoview.GeckoSession.PromptDelegate;
-import org.mozilla.geckoview.GeckoSession.PromptDelegate.AutocompleteRequest;
-import org.mozilla.geckoview.GeckoSession.PromptDelegate.PromptResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,8 +82,8 @@ public class MainActivity extends AppCompatActivity {
     private GeckoView geckoView;
     private androidx.recyclerview.widget.RecyclerView tabSwitcher;
     private EditText urlInput;
-    private View topBar;
-    private ImageButton btnBack, btnRefresh, btnHome, btnTabs, btnMenu;
+    private View topBar, bottomBar, contentContainer, fullscreenMenuContainer;
+    private ImageButton btnBack, btnRefresh, btnHome, btnTabs, btnMenu, btnFullscreenMenu;
     private NavigationView navigationView;
     private android.widget.ProgressBar progressBar;
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
@@ -95,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     /** 全局共享的 GeckoRuntime，一个进程通常只需要一个 */
     public static GeckoRuntime sRuntime;
     /** 当前会话中维护的所有标签页列表 */
-    private List<TabInfo> tabs = new ArrayList<>();
+    private final List<TabInfo> tabs = new ArrayList<>();
     private TabSwitcherAdapter tabSwitcherAdapter;
     /** 当前处于前台显示的标签索引 */
     private int currentTabIndex = -1;
@@ -108,13 +105,14 @@ public class MainActivity extends AppCompatActivity {
     private boolean urlInputFirstClick = true; // 跟踪URL输入框是否是第一次点击
     private boolean isSwitchingTab = false; // 防止switchToTab重入导致的崩溃和逻辑混乱
     private boolean isProcessingAction = false; // 全局锁，防止多重点击导致的 PixelCopy 并发或状态异常
+    private boolean isFullScreenMode = false;
     private GeckoResult<PromptDelegate.PromptResponse> mFilePromptResult = null;
     private PromptDelegate.FilePrompt mCurrentFilePrompt = null;
     private ActivityResultLauncher<android.content.Intent> mFilePickerLauncher;
     
     /** 应用初始化权限申请处理器 (如存储权限) */
     private ActivityResultLauncher<String> mPermissionLauncher;
-    private java.util.Queue<String> mPendingPermissions = new java.util.LinkedList<>();
+    private final java.util.Queue<String> mPendingPermissions = new java.util.LinkedList<>();
     
     /** 网页请求权限处理器 (如摄像头、地理位置) */
     private GeckoSession.PermissionDelegate.Callback mGeckoPermissionCallback;
@@ -131,11 +129,9 @@ public class MainActivity extends AppCompatActivity {
         // 沉浸式状态栏配置
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        if (controller != null) {
-            controller.setAppearanceLightStatusBars(!isDarkMode);
-            controller.setAppearanceLightNavigationBars(!isDarkMode);
-        }
-        
+        controller.setAppearanceLightStatusBars(!isDarkMode);
+        controller.setAppearanceLightNavigationBars(!isDarkMode);
+
         super.onCreate(savedInstanceState);
         
         // 1. 注册文件选择器的 Activity 回调，用于处理 <input type="file">
@@ -186,7 +182,10 @@ public class MainActivity extends AppCompatActivity {
                 if (mGeckoPermissionCallback != null) {
                     boolean anyGranted = false;
                     for (Boolean granted : result.values()) {
-                        if (granted) anyGranted = true;
+                        if (granted) {
+                            anyGranted = true;
+                            break;
+                        }
                     }
                     if (anyGranted) mGeckoPermissionCallback.grant();
                     else mGeckoPermissionCallback.reject();
@@ -211,23 +210,44 @@ public class MainActivity extends AppCompatActivity {
         btnHome = findViewById(R.id.btn_home);
         btnTabs = findViewById(R.id.btn_tabs);
         btnMenu = findViewById(R.id.btn_menu);
+        bottomBar = findViewById(R.id.bottom_bar);
+        contentContainer = findViewById(R.id.content_container);
+        fullscreenMenuContainer = findViewById(R.id.fullscreen_menu_container);
+        btnFullscreenMenu = findViewById(R.id.btn_fullscreen_menu);
         
         // 4. 应用窗口 Insets 监听 (解决刘海屏、导航栏遮挡)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawer_layout), (v, windowInsets) -> {
             Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            topBar.setPadding(topBar.getPaddingLeft(), systemBars.top, topBar.getPaddingRight(), 0);
-            View bottomBar = findViewById(R.id.bottom_bar);
-            bottomBar.setPadding(bottomBar.getPaddingLeft(), bottomBar.getPaddingTop(), bottomBar.getPaddingRight(), systemBars.bottom);
-            navigationView.setPadding(0, 0, 0, systemBars.bottom);
+            int topPadding = systemBars.top;
+            int bottomPadding = systemBars.bottom;
+            
+            topBar.setPadding(topBar.getPaddingLeft(), topPadding, topBar.getPaddingRight(), 0);
+            bottomBar.setPadding(bottomBar.getPaddingLeft(), bottomBar.getPaddingTop(), bottomBar.getPaddingRight(), bottomPadding);
+            navigationView.setPadding(0, 0, 0, bottomPadding);
+            
+            if (contentContainer != null) {
+                android.view.ViewGroup.MarginLayoutParams lp = (android.view.ViewGroup.MarginLayoutParams) contentContainer.getLayoutParams();
+                if (topBar.getVisibility() == View.GONE) {
+                    // 全屏显示时，顶栏消失，内容容器直接给顶部 padding 以避开系统状态栏
+                    contentContainer.setPadding(0, topPadding, 0, 0);
+                } else {
+                    contentContainer.setPadding(0, 0, 0, 0);
+                }
+                contentContainer.setLayoutParams(lp);
+            }
+            
+            // 为全屏模式下的进度条保存顶部高度
+            if (progressBar != null) {
+                android.view.ViewGroup.MarginLayoutParams lp = (android.view.ViewGroup.MarginLayoutParams) progressBar.getLayoutParams();
+                if (topBar.getVisibility() == View.GONE) {
+                    lp.topMargin = topPadding;
+                } else {
+                    lp.topMargin = 0;
+                }
+                progressBar.setLayoutParams(lp);
+            }
             return windowInsets;
         });
-        swipeRefresh = findViewById(R.id.swipe_refresh);
-        navigationView = findViewById(R.id.nav_view);
-        btnBack = findViewById(R.id.btn_back);
-        btnRefresh = findViewById(R.id.btn_refresh);
-        btnHome = findViewById(R.id.btn_home);
-        btnTabs = findViewById(R.id.btn_tabs);
-        btnMenu = findViewById(R.id.btn_menu);
         if (isPrivacyAgreed()) {
             initializeApp();
         } else {
@@ -243,9 +263,9 @@ public class MainActivity extends AppCompatActivity {
         return prefs.getBoolean(Config.PREF_KEY_PRIVACY_AGREED, false);
     }
     
-    private void setPrivacyAgreed(boolean agreed) {
+    private void setPrivacyAgreed() {
         android.content.SharedPreferences prefs = getSharedPreferences(Config.PREF_NAME_THEME, MODE_PRIVATE);
-        prefs.edit().putBoolean(Config.PREF_KEY_PRIVACY_AGREED, agreed).apply();
+        prefs.edit().putBoolean(Config.PREF_KEY_PRIVACY_AGREED, true).apply();
     }
 
     /**
@@ -257,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
             .setMessage(R.string.msg_privacy_policy)
             .setCancelable(false)
             .setPositiveButton(R.string.action_agree, (dialog, which) -> {
-                setPrivacyAgreed(true);
+                setPrivacyAgreed();
                 initializeApp();
             })
             .setNegativeButton(R.string.action_disagree, (dialog, which) -> {
@@ -361,13 +381,20 @@ public class MainActivity extends AppCompatActivity {
         if (swipeRefresh == null) return;
         swipeRefresh.setColorSchemeResources(R.color.purple_500);
         swipeRefresh.setOnRefreshListener(() -> {
-            GeckoSession session = getCurrentSession();
-            if (session != null) {
-                session.reload();
+            if (isFullScreenMode && topBar.getVisibility() == View.GONE) {
+                setBarsVisible(true);
+            } else {
+                GeckoSession session = getCurrentSession();
+                if (session != null) {
+                    session.reload();
+                }
             }
             swipeRefresh.setRefreshing(false);
         });
+        // 增加触发刷新的拉动距离，防止在全屏模式下误触
+        swipeRefresh.setDistanceToTriggerSync(400); 
     }
+    @SuppressLint("NotifyDataSetChanged")
     private void restoreTabsOrInit() {
         List<TabInfo> savedTabs = TabStorage.loadTabs(this);
         if (savedTabs != null && !savedTabs.isEmpty()) {
@@ -389,8 +416,6 @@ public class MainActivity extends AppCompatActivity {
         if (tab.session != null) return;
         GeckoSession session = new GeckoSession();
         session.open(sRuntime);
-        // LoginDelegate 已弃用，逻辑已移至 Autocomplete.StorageDelegate (Runtime) 
-        // 交互逻辑在 PromptDelegate (Session)
         tab.session = session; 
         applyThemeToSession(session);
         
@@ -451,10 +476,6 @@ public class MainActivity extends AppCompatActivity {
                    if (progressBar != null) progressBar.setVisibility(View.INVISIBLE);
                    if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
                });
-               
-                if (success) {
-                     // 移除不可靠的 JS 注入和手动触发
-                }
             }
             
             @Override public void onSessionStateChange(@NonNull GeckoSession session, @NonNull GeckoSession.SessionState sessionState) {}
@@ -481,23 +502,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onExternalResponse(@NonNull GeckoSession session, @NonNull WebResponse response) {
                 final String url = response.uri;
-                if (url == null) return;
-                
+
                 String lowerUrl = url.toLowerCase();
                 String contentType = null;
-                if (response.headers != null) {
-                    contentType = response.headers.get("Content-Type");
-                    if (contentType == null) contentType = response.headers.get("content-type");
-                }
+                contentType = response.headers.get("Content-Type");
+                if (contentType == null) contentType = response.headers.get("content-type");
 
                 // APK 检查，防止自动下载
                 if (lowerUrl.endsWith(".apk") || (contentType != null && contentType.contains("vnd.android.package-archive"))) {
                     String tempMime = contentType;
                     String tempDisp = null;
-                    if (response.headers != null) {
-                        tempDisp = response.headers.get("Content-Disposition");
-                        if (tempDisp == null) tempDisp = response.headers.get("content-disposition");
-                    }
+                    tempDisp = response.headers.get("Content-Disposition");
+                    if (tempDisp == null) tempDisp = response.headers.get("content-disposition");
                     final String apkMime = tempMime;
                     final String apkDisp = tempDisp;
                     
@@ -540,10 +556,8 @@ public class MainActivity extends AppCompatActivity {
 
                 String tempMime = contentType;
                 String tempDisp = null;
-                if (response.headers != null) {
-                    tempDisp = response.headers.get("Content-Disposition");
-                    if (tempDisp == null) tempDisp = response.headers.get("content-disposition");
-                }
+                tempDisp = response.headers.get("Content-Disposition");
+                if (tempDisp == null) tempDisp = response.headers.get("content-disposition");
                 final String finalMime = tempMime;
                 final String finalDisp = tempDisp;
                 // 把完整的 WebResponse 传给下载触发方法，让它能读取 GeckoView 的真实 Cookie
@@ -561,17 +575,12 @@ public class MainActivity extends AppCompatActivity {
             private void triggerDownloadWithHeaders(GeckoSession session, String url, String contentDisposition, String mimeType, org.mozilla.geckoview.WebResponse geckoResponse) {
                 String filename = com.olsc.manorbrowser.utils.DownloadHelper.guessFileName(url, contentDisposition, mimeType);
 
-                // ======== 方案A：直接使用 GeckoView 的已认证响应体流（推荐，可处理 Cookie/Session 认证）========
-                // GeckoView 在调用 onExternalResponse 时已经完成了带 Cookie 的 HTTP 握手，
-                // body 里就是已经认证成功的数据流，直接写磁盘即可，无需 OkHttp 重新请求。
                 if (geckoResponse != null && geckoResponse.body != null) {
                     long contentLength = -1;
-                    if (geckoResponse.headers != null) {
-                        String cl = geckoResponse.headers.get("Content-Length");
-                        if (cl == null) cl = geckoResponse.headers.get("content-length");
-                        if (cl != null) {
-                            try { contentLength = Long.parseLong(cl.trim()); } catch (NumberFormatException ignored) {}
-                        }
+                    String cl = geckoResponse.headers.get("Content-Length");
+                    if (cl == null) cl = geckoResponse.headers.get("content-length");
+                    if (cl != null) {
+                        try { contentLength = Long.parseLong(cl.trim()); } catch (NumberFormatException ignored) {}
                     }
                     com.olsc.manorbrowser.utils.BrowserDownloader.downloadFromStream(
                         MainActivity.this, url, mimeType, filename, contentLength, geckoResponse.body
@@ -579,13 +588,12 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                // ======== 方案B：OkHttp 重新请求（无 GeckoView body 时的兜底方案，如长按菜单触发） ========
                 String ua = session.getSettings().getUserAgentOverride();
                 if (ua == null || ua.isEmpty()) ua = Config.DEFAULT_UA;
 
                 // 尝试从 GeckoView 响应头中获取 Cookie（可能没有，因为是请求头不是响应头）
                 String cookies = null;
-                if (geckoResponse != null && geckoResponse.headers != null) {
+                if (geckoResponse != null) {
                     String setCookie = geckoResponse.headers.get("Set-Cookie");
                     if (setCookie == null) setCookie = geckoResponse.headers.get("set-cookie");
                     if (setCookie != null) cookies = setCookie.split(";")[0].trim();
@@ -645,7 +653,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.setType("*/*");
                 }
                 intent.addCategory(android.content.Intent.CATEGORY_OPENABLE);
-                if (prompt.type == PromptDelegate.FilePrompt.Type.MULTIPLE || prompt.type == 2) {
+                if (prompt.type == 2) {
                     intent.putExtra(android.content.Intent.EXTRA_ALLOW_MULTIPLE, true);
                 }
                 mFilePickerLauncher.launch(intent);
@@ -804,13 +812,13 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     String dlgTitle = (prompt.title != null && !prompt.title.isEmpty()) ? prompt.title : getString(R.string.dialog_title_select);
                     PromptDelegate.ChoicePrompt.Choice[] choices = prompt.choices;
-                    if (choices == null || choices.length == 0) {
+                    if (choices.length == 0) {
                         result.complete(prompt.dismiss());
                         return;
                     }
                     String[] labels = new String[choices.length];
                     for (int i = 0; i < choices.length; i++) {
-                        labels[i] = choices[i].label != null ? choices[i].label : "";
+                        labels[i] = choices[i].label;
                     }
                     if (prompt.type == PromptDelegate.ChoicePrompt.Type.SINGLE ||
                         prompt.type == PromptDelegate.ChoicePrompt.Type.MENU) {
@@ -928,7 +936,7 @@ public class MainActivity extends AppCompatActivity {
                                 runOnUiThread(() -> session.loadUri(fallbackUrl));
                                 return GeckoResult.fromValue(AllowOrDeny.DENY);
                             }
-                        } catch (Exception e) {}
+                        } catch (Exception ignored) {}
                     }
                 }
                 
@@ -995,7 +1003,7 @@ public class MainActivity extends AppCompatActivity {
                         filename = cursor.getString(nameIndex);
                     }
                 }
-            } catch (Exception e) {}
+            } catch (Exception ignored) {}
         }
         
         final String finalFilename = filename;
@@ -1010,7 +1018,7 @@ public class MainActivity extends AppCompatActivity {
             isXpi = true;
         } else if (filename != null && (filename.toLowerCase().endsWith(".xpi") || filename.toLowerCase().contains(".xpi"))) {
             isXpi = true;
-        } else if (url != null && (url.toLowerCase().endsWith(".xpi") || url.toLowerCase().contains(".xpi"))) {
+        } else if (url.toLowerCase().endsWith(".xpi") || url.toLowerCase().contains(".xpi")) {
             isXpi = true;
         }
 
@@ -1100,7 +1108,6 @@ public class MainActivity extends AppCompatActivity {
         tabSwitcher.setPadding(padding, 0, padding, 0);
         final int overlapPx = (int) (110 * displayMetrics.density);
         tabSwitcher.addItemDecoration(new RecyclerView.ItemDecoration() {
-            @SuppressWarnings("deprecation")
             @Override
             public void getItemOffsets(@NonNull android.graphics.Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                 int position = parent.getChildAdapterPosition(view);
@@ -1113,7 +1120,7 @@ public class MainActivity extends AppCompatActivity {
         });
         androidx.recyclerview.widget.LinearSnapHelper snapHelper = new androidx.recyclerview.widget.LinearSnapHelper();
         snapHelper.attachToRecyclerView(tabSwitcher);
-        TabSwipeCallback swipeCallback = new TabSwipeCallback(position -> closeTab(position));
+        TabSwipeCallback swipeCallback = new TabSwipeCallback(this::closeTab);
         androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper =
             new androidx.recyclerview.widget.ItemTouchHelper(swipeCallback);
         itemTouchHelper.attachToRecyclerView(tabSwitcher);
@@ -1175,7 +1182,7 @@ public class MainActivity extends AppCompatActivity {
             homeSearch.setSelectAllOnFocus(true);
             homeSearch.setOnFocusChangeListener((v, hasFocus) -> {
                 if (hasFocus) {
-                    homeSearch.post(() -> homeSearch.selectAll());
+                    homeSearch.post(homeSearch::selectAll);
                 }
             });
             homeSearch.setOnClickListener(v -> {
@@ -1188,6 +1195,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             });
         }
+        assert homeSearch != null;
         homeSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_DONE ||
                     (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
@@ -1228,6 +1236,79 @@ public class MainActivity extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
             }
         });
+        if (btnFullscreenMenu != null && fullscreenMenuContainer != null) {
+            fullscreenMenuContainer.setOnTouchListener(new View.OnTouchListener() {
+                private float dX, dY;
+                private float startX, startY;
+                private boolean isDragging = false;
+                private boolean longPressed = false;
+                private static final int DRAG_THRESHOLD = 20;
+                private final Handler handler = new Handler(Looper.getMainLooper());
+                private final Runnable longPressRunnable = () -> {
+                    longPressed = true;
+                    fullscreenMenuContainer.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                };
+
+                @Override
+                public boolean onTouch(View view, android.view.MotionEvent event) {
+                    switch (event.getAction()) {
+                        case android.view.MotionEvent.ACTION_DOWN:
+                            startX = event.getRawX();
+                            startY = event.getRawY();
+                            dX = view.getX() - event.getRawX();
+                            dY = view.getY() - event.getRawY();
+                            isDragging = false;
+                            longPressed = false;
+                            handler.postDelayed(longPressRunnable, 500);
+                            return true;
+
+                        case android.view.MotionEvent.ACTION_MOVE:
+                            float currentX = event.getRawX();
+                            float currentY = event.getRawY();
+                            if (!isDragging && (Math.abs(currentX - startX) > DRAG_THRESHOLD || Math.abs(currentY - startY) > DRAG_THRESHOLD)) {
+                                if (longPressed) {
+                                    isDragging = true;
+                                } else {
+                                    handler.removeCallbacks(longPressRunnable);
+                                }
+                            }
+                            if (isDragging) {
+                                view.setX(currentX + dX);
+                                view.setY(currentY + dY);
+                            }
+                            return true;
+
+                        case android.view.MotionEvent.ACTION_UP:
+                            handler.removeCallbacks(longPressRunnable);
+                            if (!isDragging) {
+                                float endX = event.getRawX();
+                                float endY = event.getRawY();
+                                if (Math.abs(endX - startX) < DRAG_THRESHOLD && Math.abs(endY - startY) < DRAG_THRESHOLD) {
+                                    // 点击球，正式退出全屏模式
+                                    toggleFullScreenMode();
+                                }
+                            }
+                            return true;
+                        case android.view.MotionEvent.ACTION_CANCEL:
+                            handler.removeCallbacks(longPressRunnable);
+                            return true;
+                    }
+                    return false;
+                }
+            });
+        }
+        
+        // 下拉恢复顶栏和底栏
+        if (swipeRefresh != null) {
+            swipeRefresh.setOnChildScrollUpCallback((parent, child) -> {
+                // 如果在全屏模式且顶栏影藏，检测下拉
+                // 注意：这里返回 false 表示可以触发下拉刷新，我们借此逻辑恢复顶栏
+                if (isFullScreenMode && topBar.getVisibility() == View.GONE) {
+                    // 我们可以在这里恢复顶栏
+                }
+                return child != null && child.canScrollVertically(-1);
+            });
+        }
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -1251,22 +1332,10 @@ public class MainActivity extends AppCompatActivity {
                 if (isProcessingAction) return false;
                 android.content.Intent intent = new android.content.Intent(this, BookmarkActivity.class);
                 startActivity(intent);
-            } else if (id == R.id.nav_passwords) {
-                if (isProcessingAction) return false;
-                android.content.Intent intent = new android.content.Intent(this, PasswordManagerActivity.class);
-                startActivity(intent);
-            } else if (id == R.id.nav_theme) {
-                navigationView.postDelayed(this::toggleTheme, 300);
             } else if (id == R.id.nav_desktop_mode) {
                 toggleDesktopMode();
-            } else if (id == R.id.nav_cookies) {
-                if (isProcessingAction) return false;
-                android.content.Intent intent = new android.content.Intent(this, CookieManagerActivity.class);
-                startActivity(intent);
-            } else if (id == R.id.nav_about) {
-                if (isProcessingAction) return false;
-                android.content.Intent intent = new android.content.Intent(this, AboutActivity.class);
-                startActivity(intent);
+            } else if (id == R.id.nav_fullscreen) {
+                toggleFullScreenMode();
             } else if (id == R.id.nav_extensions_action) {
                 navigationView.postDelayed(this::showExtensionActionDialog, 250);
             } else if (id == R.id.nav_extensions_browse) {
@@ -1276,7 +1345,7 @@ public class MainActivity extends AppCompatActivity {
                 android.content.Intent intent = new android.content.Intent(this, ExtensionManagerActivity.class);
                 startActivity(intent);
             }
-            if (isTabSwitcherVisible && id != R.id.nav_theme) toggleTabSwitcher();
+            if (isTabSwitcherVisible) toggleTabSwitcher();
             return true;
         });
         getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
@@ -1328,6 +1397,10 @@ public class MainActivity extends AppCompatActivity {
             if (desktopItem != null) {
                 desktopItem.setChecked(isDesktopMode);
                 desktopItem.setTitle(isDesktopMode ? R.string.title_mobile_mode : R.string.title_desktop_mode);
+            }
+            android.view.MenuItem fsItem = menu.findItem(R.id.nav_fullscreen);
+            if (fsItem != null) {
+                fsItem.setChecked(isFullScreenMode);
             }
         }
     }
@@ -1389,8 +1462,6 @@ public class MainActivity extends AppCompatActivity {
             
             TabInfo tab = tabs.get(targetIndex);
             if (tab.session != null) {
-                // 直接设置Session，GeckoView内部会处理断开旧Session的操作
-                // 移除 setSession(null) 以防止在某些生命周期状态下触发内部 NPE
                 if (geckoView.getSession() != tab.session) {
                     geckoView.setSession(tab.session);
                 }
@@ -1410,16 +1481,27 @@ public class MainActivity extends AppCompatActivity {
         View layoutHome = findViewById(R.id.layout_home);
         if (currentTabIndex >= 0 && currentTabIndex < tabs.size()) {
             TabInfo tab = tabs.get(currentTabIndex);
-            if (Config.URL_BLANK.equals(tab.url)) {
+            boolean isHome = Config.URL_BLANK.equals(tab.url);
+            if (isHome) {
                 geckoView.setVisibility(View.GONE);
                 layoutHome.setVisibility(View.VISIBLE);
                 urlInput.setText("");
+                // 主页强制显示 Bar，但不应该退出全屏模式的全域标志
+                setBarsVisible(true);
             } else {
                 geckoView.setVisibility(View.VISIBLE);
                 layoutHome.setVisibility(View.GONE);
+                // 仅在非主页时，根据全屏标志来决定。
+                // 即使正在加载下一页，如果 mode 为 true，就该保持。
+                if (isFullScreenMode) {
+                    setBarsVisible(false);
+                } else {
+                    setBarsVisible(true);
+                }
             }
         }
     }
+    @SuppressLint("NotifyDataSetChanged")
     private void closeTab(int position) {
         if (position < 0 || position >= tabs.size()) return;
         TabInfo tab = tabs.get(position);
@@ -1486,7 +1568,6 @@ public class MainActivity extends AppCompatActivity {
         updateTabCount();
         updateBottomTabCounter();
     }
-    @SuppressWarnings("deprecation")
     private void updateTabAnimations() {
         if (tabSwitcher.getChildCount() == 0) return;
         float centerX = tabSwitcher.getWidth() / 2f;
@@ -1496,7 +1577,6 @@ public class MainActivity extends AppCompatActivity {
             if (adapterPos == RecyclerView.NO_POSITION) continue;
             View cardView = itemView.findViewById(R.id.tab_card_view);
             if (cardView != null) {
-                // 恢复标准Z序逻辑：索引越大（越靠右），Z值越高，确保新添加的/靠右的网页浮在最上方
                 itemView.setTranslationZ(adapterPos * 10f);
                 float childCenterX = (itemView.getLeft() + itemView.getRight()) / 2f;
                 float distFromCenter = Math.abs(centerX - childCenterX);
@@ -1587,6 +1667,7 @@ public class MainActivity extends AppCompatActivity {
             isProcessingAction = false;
         });
     }
+    @SuppressLint("NotifyDataSetChanged")
     private void performToggleAnimation(boolean showSwitcher) {
         isTabSwitcherVisible = showSwitcher;
         ImageButton btnAddTab = findViewById(R.id.btn_add_tab);
@@ -1630,7 +1711,6 @@ public class MainActivity extends AppCompatActivity {
             tabSwitcher.setVisibility(View.GONE);
             tabSwitcher.setAlpha(1f);
             btnAddTab.setVisibility(View.GONE);
-            topBar.setVisibility(View.VISIBLE);
             btnMenu.setVisibility(View.VISIBLE);
             tvTabCount.setVisibility(View.GONE);
             if (currentTabIndex >= 0 && currentTabIndex < tabs.size()) {
@@ -1761,6 +1841,13 @@ public class MainActivity extends AppCompatActivity {
     private GeckoSession getCurrentSession() {
         if (currentTabIndex >= 0 && currentTabIndex < tabs.size()) {
             return tabs.get(currentTabIndex).session;
+        }
+        return null;
+    }
+    
+    private TabInfo getCurrentTab() {
+        if (currentTabIndex >= 0 && currentTabIndex < tabs.size()) {
+            return tabs.get(currentTabIndex);
         }
         return null;
     }
@@ -1977,18 +2064,15 @@ public class MainActivity extends AppCompatActivity {
             refererFinal
         );
     }
-    @SuppressWarnings("deprecation")
     private void toggleTheme() {
         android.content.SharedPreferences prefs = getSharedPreferences(Config.PREF_NAME_THEME, MODE_PRIVATE);
         boolean isDarkMode = prefs.getBoolean(Config.PREF_KEY_DARK_MODE, false);
         android.content.SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(Config.PREF_KEY_DARK_MODE, !isDarkMode);
         editor.apply();
-        if (geckoView != null && geckoView.getSession() != null) {
-        }
 
         AppCompatDelegate.setDefaultNightMode(!isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
-        android.content.Intent intent = getIntent();
+        @SuppressLint("UnsafeIntentLaunch") android.content.Intent intent = getIntent();
         intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION);
         finish();
         if (android.os.Build.VERSION.SDK_INT >= 34) {
@@ -2001,6 +2085,67 @@ public class MainActivity extends AppCompatActivity {
             overrideActivityTransition(android.app.Activity.OVERRIDE_TRANSITION_OPEN, android.R.anim.fade_in, android.R.anim.fade_out);
         } else {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        }
+    }
+    
+    private void toggleFullScreenMode() {
+        isFullScreenMode = !isFullScreenMode;
+        if (isFullScreenMode) {
+            TabInfo currentTab = getCurrentTab();
+            if (currentTab != null && Config.URL_BLANK.equals(currentTab.url)) {
+                isFullScreenMode = false;
+                Toast.makeText(this, "主页模式下不开启全屏隐藏", Toast.LENGTH_SHORT).show();
+            } else {
+                setBarsVisible(false);
+            }
+        } else {
+            setBarsVisible(true);
+        }
+        
+        if (navigationView != null) {
+            android.view.Menu menu = navigationView.getMenu();
+            android.view.MenuItem fsItem = menu.findItem(R.id.nav_fullscreen);
+            if (fsItem != null) {
+                fsItem.setChecked(isFullScreenMode);
+            }
+        }
+    }
+
+    private void setBarsVisible(boolean visible) {
+        if (topBar == null || bottomBar == null) return;
+        
+        // 如果状态没变，且不是正在强制刷新，则跳过以减少不必要的动画同步
+        if (topBar.getVisibility() == (visible ? View.VISIBLE : View.GONE) &&
+            bottomBar.getVisibility() == (visible ? View.VISIBLE : View.GONE) &&
+            (fullscreenMenuContainer == null || fullscreenMenuContainer.getVisibility() == (!visible && isFullScreenMode ? View.VISIBLE : View.GONE))) {
+            return;
+        }
+
+        android.view.ViewGroup root = findViewById(R.id.drawer_layout);
+        // 使用简单的 Transition 动画
+        android.transition.TransitionManager.beginDelayedTransition(root);
+
+        topBar.setVisibility(visible ? View.VISIBLE : View.GONE);
+        bottomBar.setVisibility(visible ? View.VISIBLE : View.GONE);
+        
+        if (fullscreenMenuContainer != null) {
+            fullscreenMenuContainer.setVisibility(!visible && isFullScreenMode ? View.VISIBLE : View.GONE);
+        }
+
+        // 重新请求 Insets 以触发 OnApplyWindowInsetsListener 中的 padding 逻辑
+        ViewCompat.requestApplyInsets(root);
+        
+        // 强制刷新一次 padding，防止 Insets 监听器响应延迟导致闪烁或重叠
+        if (contentContainer != null) {
+            WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(root);
+            if (insets != null) {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                if (!visible) {
+                    contentContainer.setPadding(0, systemBars.top, 0, 0);
+                } else {
+                    contentContainer.setPadding(0, 0, 0, 0);
+                }
+            }
         }
     }
     
@@ -2366,14 +2511,14 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         }
-        
-        if (uri.contains("//play.google.com/store/apps/details?id=") || 
+
+        if (uri.contains("//play.google.com/store/apps/details?id=") ||
             uri.contains("//play.google.com/store/search?q=") ||
             uri.contains("//apps.apple.com/") ||
             uri.contains("//itunes.apple.com/")) {
             return true;
         }
-        
+
         return false;
     }
     
@@ -2572,7 +2717,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void triggerExtensionAction(org.mozilla.geckoview.WebExtension extension) {
-         if (extension.metaData != null && extension.metaData.optionsPageUrl != null) {
+         if (extension.metaData.optionsPageUrl != null) {
               createNewTab(extension.metaData.optionsPageUrl);
          } else {
               Toast.makeText(this, getString(R.string.action_extension_options) + "\n" + extension.metaData.name, Toast.LENGTH_SHORT).show();
@@ -2720,7 +2865,7 @@ public class MainActivity extends AppCompatActivity {
             public void onBindViewHolder(@NonNull PasswordSelectionViewHolder holder, int position) {
                 Autocomplete.LoginSelectOption option = logins[position];
                 LoginEntry item = option.value;
-                holder.tvUsername.setText(item != null ? (item.username != null ? item.username : item.origin) : "Unknown Account");
+                holder.tvUsername.setText(item.username);
                 holder.itemView.setOnClickListener(v -> {
                     if (completed.compareAndSet(false, true)) {
                         dialog.dismiss();
@@ -2756,7 +2901,7 @@ public class MainActivity extends AppCompatActivity {
      * 处理原生回调的账号保存/更新逻辑。
      */
     private void handleNativeSavePassword(PromptDelegate.AutocompleteRequest<Autocomplete.LoginSaveOption> request, GeckoResult<PromptDelegate.PromptResponse> result) {
-        if (request.options == null || request.options.length == 0) {
+        if (request.options.length == 0) {
              try { result.complete(request.dismiss()); } catch (Exception ignored) {}
              return;
         }
@@ -2772,7 +2917,7 @@ public class MainActivity extends AppCompatActivity {
             else neverOption = opt;
         }
 
-        if (saveOption == null || saveOption.value == null) {
+        if (saveOption == null) {
             if (completed.compareAndSet(false, true)) {
                 try { result.complete(request.dismiss()); } catch (Exception ignored) {}
             }
@@ -2789,8 +2934,8 @@ public class MainActivity extends AppCompatActivity {
         List<PasswordItem> matches = PasswordStorage.getPasswordsForUrl(getApplicationContext(), login.origin);
         for (PasswordItem item : matches) {
             // 健壮的用户名匹配逻辑
-            boolean nameMatches = (item.username == null || item.username.isEmpty()) ? 
-                                (login.username == null || login.username.isEmpty()) : 
+            boolean nameMatches = item.username == null || item.username.isEmpty() ?
+                    login.username.isEmpty() :
                                 item.username.equals(login.username);
             
             if (nameMatches) {

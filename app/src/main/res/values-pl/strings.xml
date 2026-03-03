@@ -269,4 +269,11 @@
     <string name="action_update">Aktualizuj</string>
     <string name="msg_update_password">Czy chcesz zaktualizować hasło dla %1$s?</string>
     <string name="title_update_password">Aktualizować hasło?</string>
+    <string name="settings_group_general">Ogólne</string>
+    <string name="settings_group_personalization">Personalizacja</string>
+    <string name="settings_group_privacy">Prywatność i bezpieczeństwo</string>
+    <string name="settings_group_about">O aplikacji</string>
+    <string name="pref_theme_title">Motyw wyświetlania</string>
+    <string name="pref_theme_desc">Przełączanie między trybem jasnym i ciemnym</string>
+    <string name="action_fullscreen">Tryb pełnoekranowy</string>
 </resources>

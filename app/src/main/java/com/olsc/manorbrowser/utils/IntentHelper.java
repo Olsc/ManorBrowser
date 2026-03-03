@@ -89,7 +89,7 @@ public class IntentHelper {
             PackageManager pm = context.getPackageManager();
             List<ResolveInfo> activities = pm.queryIntentActivities(intent, 0);
 
-            if (activities != null && !activities.isEmpty()) {
+            if (!activities.isEmpty()) {
                 // 如果只有一个匹配项（非浏览器），直接设置包名以确保精准跳转，避免系统选择器
                 if (activities.size() == 1) {
                     intent.setPackage(activities.get(0).activityInfo.packageName);
@@ -241,17 +241,15 @@ public class IntentHelper {
             List<ResolveInfo> activities = pm.queryIntentActivities(intent, 0);
 
             // 过滤掉当前应用及其他常见浏览器，防止在多个浏览器间循环跳转
-            if (activities != null) {
-                activities.removeIf(info -> {
-                    String packageName = info.activityInfo.packageName;
-                    return packageName.contains("com.olsc.manorbrowser") ||
-                           packageName.contains("browser") ||
-                           packageName.contains("chrome") ||
-                           packageName.contains("firefox");
-                });
-            }
+            activities.removeIf(info -> {
+                String packageName = info.activityInfo.packageName;
+                return packageName.contains("com.olsc.manorbrowser") ||
+                        packageName.contains("browser") ||
+                        packageName.contains("chrome") ||
+                        packageName.contains("firefox");
+            });
 
-            if (activities != null && !activities.isEmpty()) {
+            if (!activities.isEmpty()) {
                 // 如果过滤后只有一个匹配项，直接设置包名确保精准跳转
                 if (activities.size() == 1) {
                     intent.setPackage(activities.get(0).activityInfo.packageName);

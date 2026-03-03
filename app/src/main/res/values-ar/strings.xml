@@ -260,4 +260,11 @@
     <string name="action_update">تحديث</string>
     <string name="msg_update_password">هل تريد تحديث كلمة المرور لـ %1$s؟</string>
     <string name="title_update_password">تحديث كلمة المرور؟</string>
+    <string name="settings_group_general">عام</string>
+    <string name="settings_group_personalization">التخصيص</string>
+    <string name="settings_group_privacy">الخصوصية والأمان</string>
+    <string name="settings_group_about">حول</string>
+    <string name="pref_theme_title">مظهر العرض</string>
+    <string name="pref_theme_desc">التبديل بين الوضع الفاتح والداكن</string>
+    <string name="action_fullscreen">وضع ملء الشاشة</string>
 </resources>

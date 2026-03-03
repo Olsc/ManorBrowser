@@ -2,6 +2,7 @@
  * 书签管理界面，允许用户查看、添加、删除和编辑书签。
  */
 package com.olsc.manorbrowser.activity;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -103,6 +104,7 @@ public class BookmarkActivity extends AppCompatActivity {
             }
         });
     }
+    @SuppressLint("NotifyDataSetChanged")
     private void refreshList() {
         displayList.clear();
         if (folderStack.isEmpty()) {

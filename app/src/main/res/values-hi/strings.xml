@@ -269,4 +269,11 @@
     <string name="action_update">अपडेट करें</string>
     <string name="msg_update_password">क्या आप %1$s के लिए पासवर्ड अपडेट करना चाहते हैं?</string>
     <string name="title_update_password">पासवर्ड अपडेट करें?</string>
+    <string name="settings_group_general">सामान्य</string>
+    <string name="settings_group_personalization">वैयक्तिकरण</string>
+    <string name="settings_group_privacy">गोपनीयता और सुरक्षा</string>
+    <string name="settings_group_about">के बारे में</string>
+    <string name="pref_theme_title">प्रदर्शन थीम</string>
+    <string name="pref_theme_desc">हल्के और गहरे मोड के बीच स्विच करें</string>
+    <string name="action_fullscreen">पूर्णस्क्रीन मोड</string>
 </resources>
