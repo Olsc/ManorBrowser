@@ -5,7 +5,7 @@
  * 注意：本项目采用"手机主动连接 PC"的反向连接模式，手机无需对外开放端口。
  *
  * 支持的操作由 CommandHandler 定义，包括：
- * - 导航到指定 URL
+ * - 导航与标签页管理
  * - 异步执行 JavaScript
  * - 获取浏览历史与下载列表
  * - 获取当前页面 URL / 标题 / 状态
@@ -14,6 +14,7 @@ package com.olsc.manorbrowser.utils;
 
 import com.olsc.manorbrowser.data.DownloadInfo;
 import com.olsc.manorbrowser.data.HistoryStorage;
+import com.olsc.manorbrowser.data.TabInfo;
 
 import java.util.List;
 
@@ -25,6 +26,15 @@ public class BrowserCommandServer {
     public interface CommandHandler {
         /** 导航到指定 URL */
         void navigate(String url);
+
+        /** 后退 */
+        void goBack();
+
+        /** 前进 */
+        void goForward();
+
+        /** 刷新 */
+        void reload();
 
         /** 异步执行 JavaScript，通过 callback 返回字符串结果 */
         void evalJs(String js, EvalCallback callback);
@@ -43,6 +53,20 @@ public class BrowserCommandServer {
 
         /** 获取当前浏览器状态的 JSON 字符串（含 URL + 标题） */
         String getStatus();
+
+        // --- 标签页管理 ---
+
+        /** 获取所有标签页信息 */
+        List<TabInfo> getTabs();
+
+        /** 切换到指定索引的标签页 */
+        void switchTab(int index);
+
+        /** 关闭指定索引的标签页 */
+        void closeTab(int index);
+
+        /** 创建新标签页 */
+        void createTab(String url);
     }
 
     /** JS 执行结果回调 */

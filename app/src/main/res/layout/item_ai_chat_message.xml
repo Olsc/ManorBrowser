@@ -86,10 +86,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#AAFFFFFF"
-                    android:textSize="11sp"
-                    android:maxWidth="220dp"
-                    android:ellipsize="end"
-                    android:maxLines="1" />
+                    android:textSize="11sp" />
             </LinearLayout>
 
             <!-- AI 气泡 -->

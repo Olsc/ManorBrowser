@@ -2869,6 +2869,30 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void goBack() {
+                runOnUiThread(() -> {
+                    GeckoSession session = getCurrentSession();
+                    if (session != null) session.goBack();
+                });
+            }
+
+            @Override
+            public void goForward() {
+                runOnUiThread(() -> {
+                    GeckoSession session = getCurrentSession();
+                    if (session != null) session.goForward();
+                });
+            }
+
+            @Override
+            public void reload() {
+                runOnUiThread(() -> {
+                    GeckoSession session = getCurrentSession();
+                    if (session != null) session.reload();
+                });
+            }
+
+            @Override
             public void evalJs(String js, BrowserCommandServer.EvalCallback callback) {
                 runOnUiThread(() -> {
                     GeckoSession session = getCurrentSession();
@@ -2918,8 +2942,30 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject s = new JSONObject();
                     s.put("url", getCurrentUrl());
                     s.put("title", getCurrentTitle());
+                    s.put("tabCount", tabs.size());
+                    s.put("currentTabIndex", currentTabIndex);
                     return s.toString();
                 } catch (Exception e) { return "{}"; }
+            }
+
+            @Override
+            public java.util.List<com.olsc.manorbrowser.data.TabInfo> getTabs() {
+                return new java.util.ArrayList<>(tabs);
+            }
+
+            @Override
+            public void switchTab(int index) {
+                runOnUiThread(() -> switchToTab(index));
+            }
+
+            @Override
+            public void closeTab(int index) {
+                runOnUiThread(() -> MainActivity.this.closeTab(index));
+            }
+
+            @Override
+            public void createTab(String url) {
+                runOnUiThread(() -> createNewTab(url));
             }
         });
 

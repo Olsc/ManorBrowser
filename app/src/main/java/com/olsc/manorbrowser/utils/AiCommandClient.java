@@ -254,6 +254,73 @@ public class AiCommandClient {
                     }
                     return new JSONObject().put("status", "ok").put("data", arr).toString();
                 }
+                case "go_back":
+                    handler.goBack();
+                    return jsonOk("ok");
+                case "go_forward":
+                    handler.goForward();
+                    return jsonOk("ok");
+                case "reload":
+                    handler.reload();
+                    return jsonOk("ok");
+                case "get_tabs": {
+                    java.util.List<com.olsc.manorbrowser.data.TabInfo> tabs = handler.getTabs();
+                    JSONArray arr = new JSONArray();
+                    for (int i = 0; i < tabs.size(); i++) {
+                        com.olsc.manorbrowser.data.TabInfo t = tabs.get(i);
+                        arr.put(new JSONObject().put("index", i).put("title", t.title).put("url", t.url));
+                    }
+                    return new JSONObject().put("status", "ok").put("tabs", arr).toString();
+                }
+                case "switch_tab": {
+                    int index = params.getInt("index");
+                    handler.switchTab(index);
+                    return jsonOk("ok");
+                }
+                case "close_tab": {
+                    int index = params.getInt("index");
+                    handler.closeTab(index);
+                    return jsonOk("ok");
+                }
+                case "new_tab": {
+                    String url = params.optString("url", "about:blank");
+                    handler.createTab(url);
+                    return jsonOk("ok");
+                }
+                case "get_elements_tree": {
+                    // 深度提取页面交互元素（链接、按钮、输入框），包含文本、坐标、属性
+                    String js = "(function(){" +
+                            "var els=document.querySelectorAll('a, button, [role=button], input, [class*=btn], [class*=button]');" +
+                            "var results=[];" +
+                            "for(var i=0; i<els.length; i++){" +
+                            "  var el=els[i]; var r=el.getBoundingClientRect();" +
+                            "  if(r.width < 2 || r.height < 2) continue;" +
+                            "  var text = (el.innerText || el.value || el.ariaLabel || el.placeholder || '').trim().substring(0, 80);" +
+                            "  if(!text && !el.href) continue;" +
+                            "  results.push({" +
+                            "    tag: el.tagName.toLowerCase()," +
+                            "    text: text," +
+                            "    href: el.href || null," +
+                            "    aria: el.ariaLabel || null," +
+                            "    x: Math.round(r.left), y: Math.round(r.top)," +
+                            "    w: Math.round(r.width), h: Math.round(r.height)" +
+                            "  });" +
+                            "  if(results.length > 80) break;" +
+                            "}" +
+                            "return JSON.stringify(results);})()";
+                    return jsonOk(evalSync(js, 12));
+                }
+                case "scroll_to": {
+                    int x = params.optInt("x", 0);
+                    int y = params.optInt("y", 0);
+                    String js = "window.scrollTo(" + x + "," + y + "); 'ok'";
+                    return jsonOk(evalSync(js, 5));
+                }
+                case "scroll_by": {
+                    int dy = params.optInt("dy", 400);
+                    String js = "window.scrollBy(0, " + dy + "); 'ok'";
+                    return jsonOk(evalSync(js, 5));
+                }
                 case "ping":
                     return jsonOk("pong");
                 default:

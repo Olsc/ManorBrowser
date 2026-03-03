@@ -29,6 +29,7 @@ public class AiChatAdapter extends RecyclerView.Adapter<AiChatAdapter.VH> {
         public String toolCall;   // tool调用描述（可选）
         public boolean thinking;  // 是否正在思考
         public String statusText; // 思考状态文字（如"执行工具中..."）
+        public final List<String> logSteps = new ArrayList<>(); // 操作日志记录
 
         public ChatMessage(int type, String text) {
             this.type = type;
@@ -93,11 +94,23 @@ public class AiChatAdapter extends RecyclerView.Adapter<AiChatAdapter.VH> {
         }
     }
 
-    public void updateLastAiToolCall(String toolDesc) {
+    public void addAiLogStep(String step) {
         for (int i = messages.size() - 1; i >= 0; i--) {
             ChatMessage m = messages.get(i);
             if (m.type == TYPE_AI) {
-                m.toolCall = toolDesc;
+                m.logSteps.add(step);
+                notifyItemChanged(i, "tool");
+                return;
+            }
+        }
+    }
+
+    public void clearLastAiToolCall() {
+        for (int i = messages.size() - 1; i >= 0; i--) {
+            ChatMessage m = messages.get(i);
+            if (m.type == TYPE_AI) {
+                m.toolCall = null;
+                // m.logSteps.clear(); // 通常不清除历史日志，让用户看到轨迹
                 notifyItemChanged(i, "tool");
                 return;
             }
@@ -158,9 +171,17 @@ public class AiChatAdapter extends RecyclerView.Adapter<AiChatAdapter.VH> {
                     h.aiStatusRow.setVisibility(msg.thinking ? View.VISIBLE : View.GONE);
                     h.tvAiStatusText.setText(msg.statusText != null ? msg.statusText : "思考中...");
                 } else if ("tool".equals(payload)) {
+                    StringBuilder sb = new StringBuilder();
                     if (msg.toolCall != null && !msg.toolCall.isEmpty()) {
+                        sb.append(msg.toolCall).append("\n");
+                    }
+                    for (String step : msg.logSteps) {
+                        sb.append("- ").append(step).append("\n");
+                    }
+                    String text = sb.toString().trim();
+                    if (!text.isEmpty()) {
                         h.toolCallContainer.setVisibility(View.VISIBLE);
-                        h.tvToolCallText.setText(msg.toolCall);
+                        h.tvToolCallText.setText(text);
                     } else {
                         h.toolCallContainer.setVisibility(View.GONE);
                     }
@@ -186,10 +207,18 @@ public class AiChatAdapter extends RecyclerView.Adapter<AiChatAdapter.VH> {
                 h.aiStatusRow.setVisibility(View.GONE);
             }
 
-            // Tool调用
+            // Tool调用轨迹
+            StringBuilder sb = new StringBuilder();
             if (msg.toolCall != null && !msg.toolCall.isEmpty()) {
+                sb.append(msg.toolCall).append("\n");
+            }
+            for (String step : msg.logSteps) {
+                sb.append("- ").append(step).append("\n");
+            }
+            String logText = sb.toString().trim();
+            if (!logText.isEmpty()) {
                 h.toolCallContainer.setVisibility(View.VISIBLE);
-                h.tvToolCallText.setText(msg.toolCall);
+                h.tvToolCallText.setText(logText);
             } else {
                 h.toolCallContainer.setVisibility(View.GONE);
             }

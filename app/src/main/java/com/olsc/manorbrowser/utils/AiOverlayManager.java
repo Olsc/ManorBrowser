@@ -273,11 +273,13 @@ public class AiOverlayManager {
                                 } 
                                 else if ("tool_start".equals(type)) {
                                     String toolName = data.optString("name");
-                                    chatAdapter.updateLastAiToolCall(activity.getString(R.string.ai_tool_call_label, toolName));
-                                    tvThinkingBarText.setText(activity.getString(R.string.ai_msg_running_tool, toolName));
+                                    JSONObject toolArgs = data.optJSONObject("args");
+                                    String toolLabel = getFriendlyToolName(toolName, toolArgs);
+                                    chatAdapter.addAiLogStep(toolLabel);
+                                    tvThinkingBarText.setText(activity.getString(R.string.ai_msg_running_tool, toolLabel));
                                 } 
                                 else if ("tool_result".equals(type)) {
-                                    chatAdapter.updateLastAiToolCall(null);
+                                    chatAdapter.clearLastAiToolCall();
                                     tvThinkingBarText.setText(activity.getString(R.string.ai_msg_received_data));
                                     chatAdapter.updateLastAiStatus(activity.getString(R.string.ai_msg_processing_result));
                                 } 
@@ -316,6 +318,49 @@ public class AiOverlayManager {
             thinkingBar.setVisibility(View.GONE);
             chatAdapter.finalizeLastAiMessage();
         });
+    }
+
+    /**
+     * 将技术化的工具名和参数转换为友好的中文描述
+     */
+    private String getFriendlyToolName(String toolName, JSONObject args) {
+        if (toolName == null) return "Unknown";
+        if (args == null) args = new JSONObject();
+        
+        switch (toolName) {
+            case "browser_navigate": 
+                return "正在前往: " + args.optString("url", "...");
+            case "browser_search": 
+                return "搜索关键词: " + args.optString("keyword", "...");
+            case "browser_get_page_content": return "分析页面文本内容...";
+            case "browser_get_elements_tree": return "解析网页 UI 结构...";
+            case "browser_click": 
+                String sel = args.optString("selector");
+                String txt = args.optString("text");
+                return "点击元素: " + (txt != null && !txt.isEmpty() ? txt : (sel != null && !sel.isEmpty() ? sel : "按钮"));
+            case "browser_set_input": 
+                return "填写文本: " + args.optString("value", "***");
+            case "browser_scroll": 
+                String dir = args.optString("direction", "down");
+                return "滚动页面 (" + ("down".equals(dir) ? "向下" : "向上") + ")...";
+            case "browser_tab_management": {
+                String act = args.optString("action");
+                if ("new".equals(act)) return "新建标签页: " + args.optString("url", "...");
+                if ("switch".equals(act)) return "切换至标签 #" + args.optInt("index");
+                if ("close".equals(act)) return "关闭标签 #" + args.optInt("index");
+                return "管理浏览器标签...";
+            }
+            case "browser_navigate_control": {
+                String act = args.optString("action");
+                if ("back".equals(act)) return "网页后退";
+                if ("forward".equals(act)) return "网页前进";
+                return "刷新当前页面";
+            }
+            case "browser_get_status": return "同步浏览器运行状态...";
+            case "browser_get_history": return "查询历史记录...";
+            case "browser_get_downloads": return "检查下载状态...";
+            default: return toolName;
+        }
     }
 }
 
