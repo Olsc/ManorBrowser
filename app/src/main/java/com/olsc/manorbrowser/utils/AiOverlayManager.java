@@ -289,7 +289,10 @@ public class AiOverlayManager {
                                 else if ("done".equals(type)) {
                                     chatAdapter.finalizeLastAiMessage();
                                 }
-                                rvChat.smoothScrollToPosition(chatAdapter.getItemCount() - 1);
+                                LinearLayoutManager lm = (LinearLayoutManager) rvChat.getLayoutManager();
+                                if (lm != null && lm.findLastVisibleItemPosition() >= chatAdapter.getItemCount() - 2) {
+                                    rvChat.post(() -> rvChat.scrollBy(0, 50000));
+                                }
                             });
 
                         } catch (Exception e) {

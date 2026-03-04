@@ -151,6 +151,57 @@ public class AiChatAdapter extends RecyclerView.Adapter<AiChatAdapter.VH> {
         onBindViewHolder(h, pos, new ArrayList<>());
     }
 
+    private CharSequence formatMessage(String text) {
+        if (text == null) return "";
+        android.text.SpannableStringBuilder ssb = new android.text.SpannableStringBuilder();
+        String lowerText = text.toLowerCase();
+        String thinkStart = "<think>";
+        String thinkEnd = "</think>";
+        
+        int currentIndex = 0;
+        while (currentIndex < text.length()) {
+            int startIdx = lowerText.indexOf(thinkStart, currentIndex);
+            if (startIdx == -1) {
+                ssb.append(text.substring(currentIndex));
+                break;
+            }
+            
+            ssb.append(text.substring(currentIndex, startIdx));
+            
+            int thinkContentStart = startIdx + thinkStart.length();
+            if (thinkContentStart < text.length() && text.charAt(thinkContentStart) == '\n') {
+                thinkContentStart++;
+            }
+            
+            int endIdx = lowerText.indexOf(thinkEnd, thinkContentStart);
+            int spanStart = ssb.length();
+            
+            if (endIdx == -1) {
+                ssb.append(text.substring(thinkContentStart));
+                int spanEnd = ssb.length();
+                setThinkSpan(ssb, spanStart, spanEnd);
+                break;
+            } else {
+                ssb.append(text.substring(thinkContentStart, endIdx));
+                int spanEnd = ssb.length();
+                setThinkSpan(ssb, spanStart, spanEnd);
+                
+                currentIndex = endIdx + thinkEnd.length();
+                if (currentIndex < text.length() && text.charAt(currentIndex) == '\n') {
+                    currentIndex++;
+                }
+            }
+        }
+        return ssb;
+    }
+
+    private void setThinkSpan(android.text.SpannableStringBuilder ssb, int start, int end) {
+        if (start >= end) return;
+        ssb.setSpan(new android.text.style.RelativeSizeSpan(0.85f), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        ssb.setSpan(new android.text.style.ForegroundColorSpan(0xFF999999), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        ssb.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.ITALIC), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
     @Override
     public void onBindViewHolder(@NonNull VH h, int pos, @NonNull List<Object> payloads) {
         ChatMessage msg = messages.get(pos);
@@ -161,7 +212,7 @@ public class AiChatAdapter extends RecyclerView.Adapter<AiChatAdapter.VH> {
                 if ("text".equals(payload)) {
                     if (msg.text != null && !msg.text.isEmpty()) {
                         h.tvAiBubble.setVisibility(View.VISIBLE);
-                        h.tvAiBubble.setText(msg.text);
+                        h.tvAiBubble.setText(formatMessage(msg.text));
                     } else {
                         h.tvAiBubble.setVisibility(View.GONE);
                     }
@@ -226,7 +277,7 @@ public class AiChatAdapter extends RecyclerView.Adapter<AiChatAdapter.VH> {
             // 内容气泡
             if (msg.text != null && !msg.text.isEmpty()) {
                 h.tvAiBubble.setVisibility(View.VISIBLE);
-                h.tvAiBubble.setText(msg.text);
+                h.tvAiBubble.setText(formatMessage(msg.text));
             } else {
                 h.tvAiBubble.setVisibility(View.GONE);
             }
