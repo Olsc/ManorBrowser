@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 液态玻璃条：用于顶栏/底栏，半透明底 + 顶部高光 + 底部细描边 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 顶部高光线 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/glass_stroke" />
+        </shape>
+    </item>
+    <!-- 半透明玻璃主体（上方留 1dp 高光） -->
+    <item android:top="1dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="@color/glass_bg_strong"
+                android:endColor="@color/glass_bg"
+                android:angle="270" />
+        </shape>
+    </item>
+</layer-list>

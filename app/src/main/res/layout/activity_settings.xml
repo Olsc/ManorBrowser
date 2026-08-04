@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        android:background="@color/background_surface"
-        android:elevation="4sp"
+        android:background="@drawable/bg_glass_bar"
+        android:elevation="0dp"
         app:title="@string/action_settings"
         app:titleTextColor="@color/text_primary"
         app:navigationIcon="@drawable/ic_back"
@@ -103,7 +103,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider_color"
-                        android:layout_marginStart="56dp" />
+                        android:layout_marginStart="40dp" />
 
                     <LinearLayout
                         android:id="@+id/container_language_select"
@@ -153,7 +153,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider_color"
-                        android:layout_marginStart="56dp" />
+                        android:layout_marginStart="40dp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -198,7 +198,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider_color"
-                        android:layout_marginStart="56dp" />
+                        android:layout_marginStart="40dp" />
 
                     <LinearLayout
                         android:id="@+id/container_default_browser"
@@ -248,7 +248,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider_color"
-                        android:layout_marginStart="56dp" />
+                        android:layout_marginStart="40dp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -366,7 +366,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider_color"
-                        android:layout_marginStart="56dp" />
+                        android:layout_marginStart="40dp" />
 
                     <LinearLayout
                         android:id="@+id/container_background_effect_select"
@@ -458,7 +458,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider_color"
-                        android:layout_marginStart="56dp" />
+                        android:layout_marginStart="40dp" />
 
                     <LinearLayout
                         android:id="@+id/container_custom_home_button"
@@ -580,7 +580,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider_color"
-                        android:layout_marginStart="56dp" />
+                        android:layout_marginStart="40dp" />
 
                     <LinearLayout
                         android:id="@+id/container_cookies"
@@ -630,7 +630,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider_color"
-                        android:layout_marginStart="56dp" />
+                        android:layout_marginStart="40dp" />
 
                     <LinearLayout
                         android:id="@+id/container_restricted_sites"
@@ -813,7 +813,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider_color"
-                        android:layout_marginStart="56dp" />
+                        android:layout_marginStart="40dp" />
 
                     <LinearLayout
                         android:id="@+id/container_ai_server_url"

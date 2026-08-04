@@ -49,7 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="?android:attr/colorBackground">
 
@@ -82,7 +82,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#1A000000"
+                        android:background="@color/divider_color"
                         android:layout_marginHorizontal="16dp" />
 
                     <!-- License -->
@@ -107,7 +107,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#1A000000"
+                        android:background="@color/divider_color"
                         android:layout_marginHorizontal="16dp" />
 
                     <!-- App Version -->
@@ -134,7 +134,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#1A000000"
+                        android:background="@color/divider_color"
                         android:layout_marginHorizontal="16dp" />
 
                     <!-- GeckoView Version -->
@@ -161,7 +161,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#1A000000"
+                        android:background="@color/divider_color"
                         android:layout_marginHorizontal="16dp" />
 
                     <!-- Android SDK Version -->
@@ -188,7 +188,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#1A000000"
+                        android:background="@color/divider_color"
                         android:layout_marginHorizontal="16dp" />
 
                     <!-- Source Code -->

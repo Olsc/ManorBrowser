@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>暗网访问警告</title>
     <style>
         * {
@@ -17,66 +17,144 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
-            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+        }
+
+        :root {
+            --bg-1: #1c1f2e;
+            --bg-2: #2c2f44;
+            --bg-3: #14151f;
+            --text: #eceef6;
+            --text-soft: #aab0c8;
+            --glass-bg: rgba(30, 32, 50, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.14);
+            --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            --accent: #e74c3c;
+            --accent-deep: #c0392b;
+            --accent-soft: rgba(231, 76, 60, 0.14);
+            --btn-text: #ffffff;
+            --btn-secondary-text: #bdc3c7;
+            --orb-1: rgba(231, 76, 60, 0.28);
+            --orb-2: rgba(100, 70, 180, 0.25);
         }
 
         body {
-            background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
+            background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+            background-size: 400% 400%;
+            animation: flow 16s ease infinite;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ecf0f1;
-            animation: flow 10s ease infinite;
+            color: var(--text);
+            -webkit-tap-highlight-color: transparent;
         }
 
         @keyframes flow {
-            0% {
-                background-position: 0% 50%;
-            }
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-            50% {
-                background-position: 100% 50%;
-            }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            z-index: 1;
+            pointer-events: none;
+            animation: float 20s infinite alternate ease-in-out;
+        }
 
-            100% {
-                background-position: 0% 50%;
-            }
+        .orb-1 {
+            width: 360px;
+            height: 360px;
+            top: -140px;
+            right: -120px;
+            background: var(--orb-1);
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            bottom: -160px;
+            left: -120px;
+            background: var(--orb-2);
+            animation-delay: -8s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-40px, 60px) scale(1.1); }
         }
 
         .content {
-            text-align: center;
-            padding: 30px;
+            position: relative;
             z-index: 10;
-            animation: fadeIn 1s;
+            text-align: center;
+            padding: 36px 28px;
             width: 90%;
-            max-width: 450px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            max-width: 440px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(150%);
+            -webkit-backdrop-filter: blur(24px) saturate(150%);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            box-shadow: var(--glass-shadow);
+            animation: fadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .icon {
-            font-size: 5rem;
-            margin-bottom: 1.2rem;
-            opacity: 0.9;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+            width: 84px;
+            height: 84px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+            box-shadow: 0 10px 28px rgba(231, 76, 60, 0.4);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .icon svg {
+            width: 44px;
+            height: 44px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
         }
 
         h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.2rem;
-            color: #e74c3c;
-            line-height: 1.3;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--accent);
+            line-height: 1.35;
         }
 
-        p {
-            font-size: 1rem;
-            margin-bottom: 2rem;
-            opacity: 0.8;
-            line-height: 1.6;
+        .warning-text {
+            text-align: left;
+            background: var(--accent-soft);
+            padding: 16px;
+            border-radius: 14px;
+            border-left: 4px solid var(--accent);
+            margin-bottom: 18px;
+        }
+
+        .warning-text p {
+            font-size: 0.92rem;
+            opacity: 0.9;
+            color: var(--text);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .hint {
+            font-size: 0.92rem;
+            margin-bottom: 26px;
+            color: var(--text-soft);
+            line-height: 1.7;
         }
 
         .btn-group {
@@ -86,93 +164,90 @@
             justify-content: center;
         }
 
+        @media (min-width: 400px) {
+            .btn-group {
+                flex-direction: row;
+                gap: 14px;
+            }
+        }
+
         .btn {
             text-decoration: none;
             padding: 14px 20px;
             border-radius: 16px;
-            font-size: 1rem;
-            transition: all 0.3s;
+            font-size: 0.98rem;
+            transition: all 0.25s ease;
             display: block;
             cursor: pointer;
             font-weight: 500;
             text-align: center;
-        }
-
-        @media (min-width: 400px) {
-            .btn-group {
-                flex-direction: row;
-                gap: 15px;
-            }
-
-            .btn {
-                flex: 1;
-                display: inline-block;
-            }
-
-            h1 {
-                font-size: 1.8rem;
-            }
+            border: 1px solid transparent;
+            flex: 1;
         }
 
         .btn-primary {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+            color: var(--btn-text);
+            box-shadow: 0 6px 18px rgba(231, 76, 60, 0.4);
         }
 
         .btn-secondary {
             background: transparent;
-            color: #bdc3c7;
-            border: 1px solid rgba(189, 195, 199, 0.5);
+            color: var(--btn-secondary-text);
+            border: 1px solid rgba(189, 195, 199, 0.4);
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        .btn:hover,
+        .btn:active {
+            transform: translateY(-2px) scale(1.02);
+            filter: brightness(1.1);
         }
 
-        .btn-primary:hover {
-            background: #f05a4b;
+        .btn:active {
+            transform: translateY(0) scale(0.98);
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+        .btn-primary:hover,
+        .btn-primary:active {
+            background: linear-gradient(135deg, #f05a4b, #d63a2b);
+        }
+
+        .btn-secondary:hover,
+        .btn-secondary:active {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(24px) scale(0.98);
             }
-
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
-        }
-
-        .warning-text {
-            border-left: 4px solid #e74c3c;
-            padding-left: 15px;
-            text-align: left;
-            margin-bottom: 30px;
-            background: rgba(231, 76, 60, 0.1);
-            padding: 15px;
-            border-radius: 8px;
         }
     </style>
 </head>
 
 <body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
     <div class="content">
-        <div class="icon">💀</div>
+        <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L22 21H2L12 2z" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round" fill="rgba(255,255,255,0.25)" />
+                <path d="M12 9.5v5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
+                <circle cx="12" cy="17.5" r="1.3" fill="#FFFFFF" />
+            </svg>
+        </div>
         <h1 id="title">建议不要访问暗网</h1>
         <div class="warning-text">
             <p id="msg-1">您正尝试访问一个 .onion 域名的暗网网站。暗网环境复杂，包含大量虚假信息、恶意软件和非法内容。</p>
         </div>
-        <p id="msg-2">为了您的隐私和安全，建议返回安全页面。</p>
+        <p class="hint" id="msg-2">为了您的隐私和安全，建议返回安全页面。</p>
         <div class="btn-group">
             <a href="about:blank" class="btn btn-primary" id="btn-back">返回安全页</a>
             <a href="javascript:window.location.replace('')" id="continue-btn" class="btn btn-secondary">坚持进入</a>

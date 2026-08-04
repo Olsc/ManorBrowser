@@ -123,11 +123,11 @@ public class TabSwitcherAdapter extends RecyclerView.Adapter<TabSwitcherAdapter.
                 // 如果内存中已有截图，直接显示
                 preview.setImageBitmap(tab.thumbnail);
                 preview.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                preview.setBackgroundColor(0xFFE0E0E0);
+                preview.setBackgroundColor(androidx.core.content.ContextCompat.getColor(itemView.getContext(), com.olsc.manorbrowser.R.color.divider_color));
             } else {
                 // 否则显示占位背景并异步从磁盘加载缓存的缩略图
                 preview.setImageResource(0);
-                preview.setBackgroundColor(0xFFF5F5F5);
+                preview.setBackgroundColor(androidx.core.content.ContextCompat.getColor(itemView.getContext(), com.olsc.manorbrowser.R.color.background_main));
                 TabStorage.loadThumbnailAsync(itemView.getContext(), tab.id, bitmap -> {
                     if (bitmap != null && (tab.thumbnail == null || tab.thumbnail.isRecycled())) {
                         tab.thumbnail = bitmap;
@@ -135,7 +135,7 @@ public class TabSwitcherAdapter extends RecyclerView.Adapter<TabSwitcherAdapter.
                         if (getBindingAdapterPosition() == position) {
                             preview.setImageBitmap(bitmap);
                             preview.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                            preview.setBackgroundColor(0xFFE0E0E0);
+                            preview.setBackgroundColor(androidx.core.content.ContextCompat.getColor(itemView.getContext(), com.olsc.manorbrowser.R.color.divider_color));
                         }
                     }
                 });

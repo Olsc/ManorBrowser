@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 首页柔和渐变背景（深色模式）：深紫灰渐变 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
-        android:startColor="#121212"
-        android:centerColor="#1E1E1E"
-        android:endColor="#252525"
+        android:startColor="#1C1826"
+        android:centerColor="#171422"
+        android:endColor="#121016"
         android:angle="135" />
 </shape>
-

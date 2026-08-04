@@ -43,7 +43,7 @@
                 android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_history"
-                app:tint="#3F51B5"
+                app:tint="@color/icon_tint_blue"
                 android:contentDescription="@string/desc_icon" />
 
         </FrameLayout>
@@ -88,7 +88,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:src="@drawable/ic_chevron_right"
-            app:tint="#BDBDBD"
+            app:tint="@color/divider_color"
             android:contentDescription="@string/desc_icon" />
 
     </LinearLayout>

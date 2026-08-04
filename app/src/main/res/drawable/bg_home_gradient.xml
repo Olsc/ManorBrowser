@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 首页柔和渐变背景：淡紫到浅灰，营造液态玻璃氛围 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
-        android:startColor="#F8F9FA"
-        android:centerColor="#E9ECEF"
-        android:endColor="#DEE2E6"
+        android:startColor="#F1EDFB"
+        android:centerColor="#F6F4FA"
+        android:endColor="#EDEBF5"
         android:angle="135" />
 </shape>
-

@@ -647,7 +647,7 @@ public class MainActivity extends AppCompatActivity {
                    }
                }
                
-               if (tabInfo != null && tabInfo.url != null && !tabInfo.url.equals("about:blank") && !isLordMode) {
+               if (tabInfo != null && tabInfo.url != null && !tabInfo.url.equals("about:blank") && !tabInfo.url.startsWith("moz-extension://") && !isLordMode) {
                    final TabInfo finalTab = tabInfo;
                    mainHandler.removeCallbacksAndMessages(session);
                    mainHandler.postAtTime(() -> {
@@ -1196,7 +1196,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public GeckoResult<String> onLoadError(@NonNull GeckoSession session, @Nullable String uri, @NonNull org.mozilla.geckoview.WebRequestError error) {
                 // 1. 允许内部资源和关于页通过（防止重定向到 404 或 offline 导致循环或拦截失效）
-                if (uri != null && (uri.startsWith("resource://") || uri.startsWith("about:") || uri.startsWith("view-source:"))) {
+                if (uri != null && (uri.startsWith("resource://") || uri.startsWith("about:") || uri.startsWith("view-source:") || uri.startsWith("moz-extension://"))) {
                     return GeckoResult.fromValue(null);
                 }
 
@@ -1667,6 +1667,7 @@ public class MainActivity extends AppCompatActivity {
             if (isProcessingAction) return;
             GeckoSession session = getCurrentSession();
             if (session != null) {
+                mainHandler.removeCallbacksAndMessages(session);
                 session.goBack();
             }
         });
@@ -1825,8 +1826,9 @@ public class MainActivity extends AppCompatActivity {
                     currentTab = tabs.get(currentTabIndex);
                 }
 
-                // 2. 页面内后退逻辑
+                // 2. 页面内后退逻辑（后退前清除待执行的 JS 注入，防止与 goBack 并发操作导致 libxul 崩溃）
                 if (currentTab != null && currentTab.session != null && currentTab.canGoBack) {
+                    mainHandler.removeCallbacksAndMessages(currentTab.session);
                     currentTab.session.goBack();
                 } 
                 // 3. 页面无法后退时，如果不在主页，则先返回主页（响应用户要求返回主页的诉求）
@@ -1907,8 +1909,8 @@ public class MainActivity extends AppCompatActivity {
     private void resetPageLoadTimeout(TabInfo tab, String url) {
         if (tab == null || tab.session == null) return;
         
-        // 如果是本地资源页，不设置超时
-        if (url != null && url.startsWith("resource://android/assets/")) {
+        // 如果是本地资源页或扩展页，不设置超时
+        if (url != null && (url.startsWith("resource://android/assets/") || url.startsWith("moz-extension://"))) {
             cancelPageLoadTimeout(tab);
             return;
         }
@@ -1929,7 +1931,7 @@ public class MainActivity extends AppCompatActivity {
                         // 如果超时后还在加载 (进度未达 100) 且 UI 指示正在加载
                         if (progressBar != null && progressBar.getVisibility() == View.VISIBLE && tab.lastProgress < 100) {
                             tab.session.stop();
-                            String timeoutUrl = "resource://android/assets/timeout.html";
+                            String timeoutUrl = "resource://android/assets/html/timeout.html";
                             if (url != null && !url.isEmpty()) {
                                 timeoutUrl += "?url=" + android.net.Uri.encode(url);
                             }
@@ -1969,7 +1971,7 @@ public class MainActivity extends AppCompatActivity {
         if (currentTab == null || currentTab.session == null) return;
 
         String currentUrl = currentTab.url;
-        if (currentUrl != null && currentUrl.startsWith("resource://android/assets/timeout.html")) {
+        if (currentUrl != null && currentUrl.startsWith("resource://android/assets/html/timeout.html")) {
             android.net.Uri uri = android.net.Uri.parse(currentUrl);
             String originalUrl = uri.getQueryParameter("url");
             if (originalUrl != null && !originalUrl.isEmpty()) {
@@ -3045,8 +3047,17 @@ public class MainActivity extends AppCompatActivity {
         final android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_item, folderNames);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerFolder.setAdapter(adapter);
-        final android.widget.Button btnNewFolder = new android.widget.Button(this);
+        final com.google.android.material.button.MaterialButton btnNewFolder = new com.google.android.material.button.MaterialButton(this);
         btnNewFolder.setText(R.string.title_new_folder);
+        btnNewFolder.setAllCaps(false);
+        btnNewFolder.setCornerRadius(24);
+        btnNewFolder.setBackgroundColor(androidx.core.content.ContextCompat.getColor(this, com.olsc.manorbrowser.R.color.purple_500));
+        btnNewFolder.setTextColor(android.graphics.Color.WHITE);
+        android.view.ViewGroup.MarginLayoutParams folderBtnLp = new android.view.ViewGroup.MarginLayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        folderBtnLp.topMargin = (int)(12 * getResources().getDisplayMetrics().density);
+        btnNewFolder.setLayoutParams(folderBtnLp);
         layout.addView(btnNewFolder);
         
         btnNewFolder.setOnClickListener(v -> {
