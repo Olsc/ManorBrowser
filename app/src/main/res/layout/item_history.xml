@@ -88,7 +88,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:src="@drawable/ic_chevron_right"
-            app:tint="@color/divider_color"
+            app:tint="@color/text_secondary"
             android:contentDescription="@string/desc_icon" />
 
     </LinearLayout>

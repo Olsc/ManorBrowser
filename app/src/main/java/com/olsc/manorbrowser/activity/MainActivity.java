@@ -3051,7 +3051,8 @@ public class MainActivity extends AppCompatActivity {
         btnNewFolder.setText(R.string.title_new_folder);
         btnNewFolder.setAllCaps(false);
         btnNewFolder.setCornerRadius(24);
-        btnNewFolder.setBackgroundColor(androidx.core.content.ContextCompat.getColor(this, com.olsc.manorbrowser.R.color.purple_500));
+        btnNewFolder.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+            androidx.core.content.ContextCompat.getColor(this, com.olsc.manorbrowser.R.color.purple_500)));
         btnNewFolder.setTextColor(android.graphics.Color.WHITE);
         android.view.ViewGroup.MarginLayoutParams folderBtnLp = new android.view.ViewGroup.MarginLayoutParams(
             android.view.ViewGroup.LayoutParams.MATCH_PARENT,

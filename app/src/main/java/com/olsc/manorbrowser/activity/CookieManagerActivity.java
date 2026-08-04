@@ -300,7 +300,7 @@ public class CookieManagerActivity extends AppCompatActivity {
         titleView.setText(R.string.title_modify_cookie_warning);
         titleView.setPadding(60, 40, 60, 0);
         titleView.setTextSize(20);
-        titleView.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.purple_500));
+        titleView.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.danger_red));
         titleView.setTypeface(null, Typeface.BOLD);
 
         new MaterialAlertDialogBuilder(this)

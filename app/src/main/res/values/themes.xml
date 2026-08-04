@@ -81,13 +81,4 @@
     <style name="DialogNeutralButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="android:textColor">@color/text_secondary</item>
     </style>
-
-    <!-- 统一的 App 工具栏样式：液态玻璃质感 -->
-    <style name="Widget.ManorBrowser.Toolbar.Glass" parent="Widget.AppCompat.Toolbar">
-        <item name="android:background">@drawable/bg_glass_bar</item>
-        <item name="android:elevation">0dp</item>
-        <item name="titleTextColor">@color/text_primary</item>
-        <item name="navigationIconTint">@color/icon_main</item>
-        <item name="android:minHeight">?attr/actionBarSize</item>
-    </style>
 </resources>

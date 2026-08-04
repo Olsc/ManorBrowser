@@ -46,7 +46,7 @@
             app:icon="@drawable/ic_menu"
             android:textColor="#FFFFFF"
             app:iconTint="#FFFFFF"
-            app:backgroundColor="@color/purple_500" />
+            app:backgroundColor="@color/danger_red" />
 
     </FrameLayout>
 
