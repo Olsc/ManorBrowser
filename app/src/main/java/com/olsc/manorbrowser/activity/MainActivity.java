@@ -1667,6 +1667,12 @@ public class MainActivity extends AppCompatActivity {
             if (isProcessingAction) return;
             GeckoSession session = getCurrentSession();
             if (session != null) {
+                // 扩展页(moz-extension://)的 goBack 会触发引擎跨边界历史切换,导致 libxul 原生崩溃
+                // 此处改为关闭扩展标签页,回到之前的普通页面
+                if (isExtensionPageUrl(getCurrentTabUrl())) {
+                    closeExtensionTabAndSwitch();
+                    return;
+                }
                 mainHandler.removeCallbacksAndMessages(session);
                 session.goBack();
             }
@@ -1826,16 +1832,21 @@ public class MainActivity extends AppCompatActivity {
                     currentTab = tabs.get(currentTabIndex);
                 }
 
-                // 2. 页面内后退逻辑（后退前清除待执行的 JS 注入，防止与 goBack 并发操作导致 libxul 崩溃）
+                // 2. 扩展页(moz-extension://)返回：直接关闭标签，避免引擎跨边界历史切换导致 libxul 崩溃
+                if (currentTab != null && isExtensionPageUrl(currentTab.url)) {
+                    closeExtensionTabAndSwitch();
+                    return;
+                }
+                // 3. 页面内后退逻辑（后退前清除待执行的 JS 注入，防止与 goBack 并发操作导致 libxul 崩溃）
                 if (currentTab != null && currentTab.session != null && currentTab.canGoBack) {
                     mainHandler.removeCallbacksAndMessages(currentTab.session);
                     currentTab.session.goBack();
                 } 
-                // 3. 页面无法后退时，如果不在主页，则先返回主页（响应用户要求返回主页的诉求）
+                // 4. 页面无法后退时，如果不在主页，则先返回主页（响应用户要求返回主页的诉求）
                 else if (currentTab != null && !Config.URL_BLANK.equals(currentTab.url)) {
                     loadUrlInCurrentTab(Config.URL_BLANK);
                 } 
-                // 4. 已在主页且无法后退，执行退出确认逻辑
+                // 5. 已在主页且无法后退，执行退出确认逻辑
                 else {
                     long currentTime = System.currentTimeMillis();
                     if (currentTime - lastBackTime < 2000) {
@@ -2167,6 +2178,22 @@ public class MainActivity extends AppCompatActivity {
         updateTabCount();
         updateBottomTabCounter();
     }
+
+    /**
+     * 关闭当前扩展标签页(moz-extension://)并切换显示到新焦点标签。
+     * 扩展页 goBack 会触发引擎跨边界历史切换导致 libxul 崩溃，因此返回操作改为关闭标签。
+     * closeTab 仅更新 currentTabIndex 不切换显示，这里补一次 switchToTab 确保 geckoView 绑定正确 session。
+     */
+    private void closeExtensionTabAndSwitch() {
+        if (currentTabIndex < 0 || currentTabIndex >= tabs.size()) return;
+        int closingIndex = currentTabIndex;
+        closeTab(closingIndex);
+        // closeTab 后 currentTabIndex 已指向新焦点标签；若还有标签则切换显示
+        if (currentTabIndex >= 0 && currentTabIndex < tabs.size()) {
+            switchToTab(currentTabIndex);
+        }
+    }
+
     private void updateTabAnimations() {
         if (tabSwitcher.getChildCount() == 0) return;
         float centerX = tabSwitcher.getWidth() / 2f;
@@ -2555,6 +2582,17 @@ public class MainActivity extends AppCompatActivity {
             return tabs.get(currentTabIndex);
         }
         return null;
+    }
+
+    /** 当前标签页的 URL */
+    private String getCurrentTabUrl() {
+        TabInfo tab = getCurrentTab();
+        return tab != null ? tab.url : null;
+    }
+
+    /** 是否为扩展页面 URL(moz-extension://)。此类页面 goBack 会触发引擎跨边界历史切换,导致 libxul 崩溃 */
+    private boolean isExtensionPageUrl(String url) {
+        return url != null && url.startsWith("moz-extension://");
     }
     private void updateTabCount() {
         TextView tvTabCount = findViewById(R.id.tv_tab_count);
@@ -3636,7 +3674,14 @@ public class MainActivity extends AppCompatActivity {
             public void goBack() {
                 runOnUiThread(() -> {
                     GeckoSession session = getCurrentSession();
-                    if (session != null) session.goBack();
+                    if (session == null) return;
+                    // 扩展页(moz-extension://)的 goBack 会触发引擎跨边界历史切换,导致 libxul 原生崩溃
+                    if (isExtensionPageUrl(getCurrentTabUrl())) {
+                        closeExtensionTabAndSwitch();
+                        return;
+                    }
+                    mainHandler.removeCallbacksAndMessages(session);
+                    session.goBack();
                 });
             }
 
@@ -3644,7 +3689,10 @@ public class MainActivity extends AppCompatActivity {
             public void goForward() {
                 runOnUiThread(() -> {
                     GeckoSession session = getCurrentSession();
-                    if (session != null) session.goForward();
+                    if (session != null) {
+                        mainHandler.removeCallbacksAndMessages(session);
+                        session.goForward();
+                    }
                 });
             }
 
