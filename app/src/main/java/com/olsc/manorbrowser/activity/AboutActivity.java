@@ -34,6 +34,18 @@ public class AboutActivity extends AppCompatActivity {
         controller.setAppearanceLightNavigationBars(!isDarkMode);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
+
+        // 工具栏 + 返回按钮
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar_about);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setDisplayShowTitleEnabled(true);
+            }
+            toolbar.setNavigationOnClickListener(v -> finish());
+        }
+
         View mainView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());

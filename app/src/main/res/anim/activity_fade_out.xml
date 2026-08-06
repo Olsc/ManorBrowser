@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Activity 退出：轻微下移 + 淡出，对称路径 -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@interpolator/ease_out_strong">
+    <alpha
+        android:fromAlpha="1.0"
+        android:toAlpha="0.0"
+        android:duration="180" />
+    <translate
+        android:fromYDelta="0"
+        android:toYDelta="1.5%"
+        android:duration="180" />
+</set>

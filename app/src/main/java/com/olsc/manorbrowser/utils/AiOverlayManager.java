@@ -42,6 +42,11 @@ public class AiOverlayManager {
     private static final String TAG = "AiOverlayMgr";
 
     private final Activity activity;
+
+    /** 6dp 像素值（动画位移用） */
+    private static float dp6(Activity activity) {
+        return 6 * activity.getResources().getDisplayMetrics().density;
+    }
     private final AiCommandClient aiClient;
     private final BrowserCommandServer.CommandHandler handler;
 
@@ -144,11 +149,24 @@ public class AiOverlayManager {
     }
 
     /**
-     * 显示 AI 覆盖层
+     * 显示 AI 覆盖层（材质化淡入）
      */
     public void show() {
         if (rootOverlay.getVisibility() != View.VISIBLE) {
             rootOverlay.setVisibility(View.VISIBLE);
+            // 材质化进入：淡入 + 轻微放大
+            boolean reduce = com.olsc.manorbrowser.utils.Motion.isReduceMotion(activity);
+            rootOverlay.setAlpha(0f);
+            rootOverlay.setScaleX(reduce ? 1f : 0.985f);
+            rootOverlay.setScaleY(reduce ? 1f : 0.985f);
+            rootOverlay.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                    activity, com.olsc.manorbrowser.utils.Motion.DURATION_SHEET))
+                .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                .start();
             if (activity instanceof MainActivity) {
                 ((MainActivity) activity).setBarsVisible(false);
             }
@@ -174,10 +192,29 @@ public class AiOverlayManager {
 
 
     /**
-     * 隐藏 AI 覆盖层
+     * 隐藏 AI 覆盖层（淡出，对称路径）
      */
     public void hide() {
-        rootOverlay.setVisibility(View.GONE);
+        if (rootOverlay.getVisibility() == View.VISIBLE) {
+            rootOverlay.animate()
+                .alpha(0f)
+                .scaleX(0.985f)
+                .scaleY(0.985f)
+                .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                    activity, com.olsc.manorbrowser.utils.Motion.DURATION_SHEET))
+                .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                .withEndAction(() -> {
+                    // 若动画期间被新的 show() 打断（alpha 已拉高），不隐藏
+                    if (rootOverlay.getAlpha() >= 0.5f) return;
+                    rootOverlay.setVisibility(View.GONE);
+                    rootOverlay.setAlpha(1f);
+                    rootOverlay.setScaleX(1f);
+                    rootOverlay.setScaleY(1f);
+                })
+                .start();
+        } else {
+            rootOverlay.setVisibility(View.GONE);
+        }
         if (activity instanceof MainActivity) {
             ((MainActivity) activity).setBarsVisible(true);
         }
@@ -228,6 +265,15 @@ public class AiOverlayManager {
         rvChat.smoothScrollToPosition(chatAdapter.getItemCount() - 1);
 
         thinkingBar.setVisibility(View.VISIBLE);
+        thinkingBar.setAlpha(0f);
+        thinkingBar.setTranslationY(com.olsc.manorbrowser.utils.Motion.isReduceMotion(activity) ? 0f : dp6(activity));
+        thinkingBar.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                activity, com.olsc.manorbrowser.utils.Motion.DURATION_SMALL))
+            .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+            .start();
         tvThinkingBarText.setText(activity.getString(R.string.ai_thinking));
 
         String baseUrl = aiClient.getServerUrl();
@@ -357,7 +403,20 @@ public class AiOverlayManager {
             currentConn = null;
             btnSend.setEnabled(true);
             btnSend.setImageResource(R.drawable.ic_search);
-            thinkingBar.setVisibility(View.GONE);
+            thinkingBar.animate()
+                .alpha(0f)
+                .translationY(dp6(activity))
+                .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                    activity, com.olsc.manorbrowser.utils.Motion.DURATION_SMALL))
+                .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                .withEndAction(() -> {
+                    // 若动画期间发起了新请求（isRequesting 已恢复 true），不隐藏思考条
+                    if (isRequesting) return;
+                    thinkingBar.setVisibility(View.GONE);
+                    thinkingBar.setAlpha(1f);
+                    thinkingBar.setTranslationY(0f);
+                })
+                .start();
             chatAdapter.finalizeLastAiMessage();
         });
     }

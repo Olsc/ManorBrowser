@@ -38,46 +38,65 @@ public class TabSwitcherAdapter extends RecyclerView.Adapter<TabSwitcherAdapter.
         this.listener = listener;
     }
 
+    /** 预设卡片宽度（像素）。由外部按容器实际尺寸计算后设置，避免首次布局时 getHeight()==0 导致宽高错误 */
+    public void setCardWidth(int cardWidthPx) {
+        this.cardWidthPx = cardWidthPx;
+    }
+
+    private int cardWidthPx = -1;
+
     @NonNull
     @Override
     public TabViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_tab_card, parent, false);
-        
+
         // --- 动态计算卡片尺寸 ---
-        // 为了让预览卡片的比例与屏幕比例一致，此处根据屏幕宽高比和父容器高度计算卡片宽度
-        android.util.DisplayMetrics metrics = parent.getContext().getResources().getDisplayMetrics();
-        float screenRatio = (float) metrics.widthPixels / metrics.heightPixels;
-        float density = metrics.density;
-        
-        int parentHeight = parent.getHeight();
-        if (parentHeight <= 0) {
-            parentHeight = metrics.heightPixels;
+        // 优先使用外部预设宽度（按容器实际尺寸计算，避免首次布局 getHeight()==0）
+        int targetWidth = cardWidthPx;
+        if (targetWidth <= 0) {
+            // 兜底：按父容器当前高度与屏幕比例计算
+            android.util.DisplayMetrics metrics = parent.getContext().getResources().getDisplayMetrics();
+            float screenRatio = (float) metrics.widthPixels / metrics.heightPixels;
+            float density = metrics.density;
+
+            int parentHeight = parent.getHeight();
+            if (parentHeight <= 0) {
+                parentHeight = metrics.heightPixels;
+            }
+            int cardHeight = parentHeight - (int) (64 * density);
+            targetWidth = (int) (cardHeight * screenRatio);
+            int maxWidth = (int) (metrics.widthPixels * 0.85f);
+            if (targetWidth > maxWidth) {
+                targetWidth = maxWidth;
+            }
         }
-        
-        // 减去上下间距后的目标高度
-        int cardHeight = parentHeight - (int) (64 * density);
-        // 根据比例反推宽度
-        int targetWidth = (int) (cardHeight * screenRatio);
-        // 限制最大宽度，防止横屏时卡片过大
-        int maxWidth = (int) (metrics.widthPixels * 0.85f);
-        if (targetWidth > maxWidth) {
-            targetWidth = maxWidth;
-        }
-        
+
         View cardView = view.findViewById(R.id.tab_card_view);
         if (cardView != null) {
             ViewGroup.LayoutParams lp = cardView.getLayoutParams();
             lp.width = targetWidth;
             cardView.setLayoutParams(lp);
         }
-        
+
         return new TabViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull TabViewHolder holder, int position) {
         TabInfo tab = tabs.get(position);
+        // 每次绑定同步卡片宽度（notifyDataSetChanged 不会重建已存在的 ViewHolder，
+        // 旋转/尺寸变化后宽度更新必须在这里生效）
+        if (cardWidthPx > 0) {
+            View cardView = holder.itemView.findViewById(R.id.tab_card_view);
+            if (cardView != null) {
+                ViewGroup.LayoutParams lp = cardView.getLayoutParams();
+                if (lp.width != cardWidthPx) {
+                    lp.width = cardWidthPx;
+                    cardView.setLayoutParams(lp);
+                }
+            }
+        }
         holder.bind(tab, position, listener);
     }
 

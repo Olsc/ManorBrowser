@@ -33,6 +33,7 @@
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_back"
+                android:stateListAnimator="@animator/btn_press_feedback"
                 android:contentDescription="@string/desc_back"
                 app:tint="@color/icon_main" />
 
@@ -61,6 +62,7 @@
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_stop"
+                android:stateListAnimator="@animator/btn_press_feedback"
                 android:contentDescription="Stop loading"
                 android:visibility="gone"
                 app:tint="@color/icon_main" />
@@ -71,6 +73,7 @@
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_refresh"
+                android:stateListAnimator="@animator/btn_press_feedback"
                 android:contentDescription="@string/desc_refresh"
                 app:tint="@color/text_secondary" />
 
@@ -231,6 +234,7 @@
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_add"
+                android:stateListAnimator="@animator/btn_press_feedback"
                 android:contentDescription="@string/title_new_tab"
                 app:tint="@color/icon_main"
                 android:visibility="gone" />
@@ -242,6 +246,7 @@
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_menu"
+                android:stateListAnimator="@animator/btn_press_feedback"
                 android:contentDescription="@string/desc_menu"
                 app:tint="@color/icon_main" />
         </LinearLayout>

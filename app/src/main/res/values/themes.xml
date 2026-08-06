@@ -10,6 +10,7 @@
         <item name="android:windowBackground">@color/background_main</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/ManorWindowAnimation</item>
         <item name="alertDialogTheme">@style/CustomAlertDialog</item>
         <item name="bottomSheetDialogTheme">@style/BottomSheetDialogStyle</item>
         <!-- 统一卡片/浮层圆角与阴影 -->
@@ -80,5 +81,21 @@
 
     <style name="DialogNeutralButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <!-- Activity / 窗口转场：淡入淡出 + 轻微位移，强 ease-out -->
+    <style name="ManorWindowAnimation">
+        <item name="android:activityOpenEnterAnimation">@anim/activity_fade_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/window_fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@anim/window_fade_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/activity_fade_out</item>
+        <item name="android:taskOpenEnterAnimation">@anim/activity_fade_in</item>
+        <item name="android:taskOpenExitAnimation">@anim/window_fade_out</item>
+        <item name="android:taskCloseEnterAnimation">@anim/window_fade_in</item>
+        <item name="android:taskCloseExitAnimation">@anim/activity_fade_out</item>
+        <item name="android:taskToBackEnterAnimation">@anim/window_fade_in</item>
+        <item name="android:taskToBackExitAnimation">@anim/activity_fade_out</item>
+        <item name="android:taskToFrontEnterAnimation">@anim/activity_fade_in</item>
+        <item name="android:taskToFrontExitAnimation">@anim/window_fade_out</item>
     </style>
 </resources>

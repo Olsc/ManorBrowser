@@ -55,6 +55,9 @@ public class AiChatAdapter extends RecyclerView.Adapter<AiChatAdapter.VH> {
 
     private final List<ChatMessage> messages = new ArrayList<>();
 
+    /** 正在播放的思考气泡展开/收起动画（快速连点先取消旧的） */
+    private android.animation.ValueAnimator thinkAnim = null;
+
     public void addMessage(ChatMessage msg) {
         messages.add(msg);
         notifyItemInserted(messages.size() - 1);
@@ -226,8 +229,56 @@ public class AiChatAdapter extends RecyclerView.Adapter<AiChatAdapter.VH> {
         }
 
         v.setOnClickListener(view -> {
-            msg.thinkExpandedStates.set(thinkIndex, !isExpanded);
-            notifyItemChanged(messagePos, "think_expand");
+            // 平滑展开/收起：动画 maxHeight 替代硬切
+            // 点击时从状态列表读最新值，避免闭包捕获旧 isExpanded 导致无法收起
+            boolean nowExpanded = msg.thinkExpandedStates.get(thinkIndex);
+            boolean expanding = !nowExpanded;
+            msg.thinkExpandedStates.set(thinkIndex, expanding);
+            int lineHeight = tv.getLineHeight();
+            if (lineHeight <= 0) lineHeight = (int) (tv.getTextSize() * 1.4f + 0.5f);
+            final int collapsedMax = lineHeight * 3 + tv.getPaddingTop() + tv.getPaddingBottom();
+            final int expandedMax = 100000; // 等价"不限制"
+            // 快速连点时取消上一次动画，从当前高度继续
+            if (thinkAnim != null && thinkAnim.isRunning()) {
+                thinkAnim.cancel();
+            }
+            int start = tv.getMaxHeight();
+            int end = expanding ? expandedMax : collapsedMax;
+            // 收起时立即切底部对齐（显示末 3 行），展开时动画结束时切顶部对齐
+            if (!expanding) {
+                tv.setGravity(android.view.Gravity.BOTTOM);
+            }
+            android.animation.ValueAnimator anim = android.animation.ValueAnimator.ofInt(start, end);
+            thinkAnim = anim;
+            anim.setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                v.getContext(), com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH));
+            anim.setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT);
+            anim.addUpdateListener(a -> {
+                tv.setMaxHeight((Integer) a.getAnimatedValue());
+            });
+            anim.addListener(new android.animation.AnimatorListenerAdapter() {
+                private boolean cancelled = false;
+
+                @Override
+                public void onAnimationCancel(android.animation.Animator animation) {
+                    cancelled = true;
+                    if (thinkAnim == animation) thinkAnim = null;
+                }
+
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    if (cancelled) return;
+                    if (thinkAnim == animation) thinkAnim = null;
+                    tv.setMaxLines(expanding ? Integer.MAX_VALUE : 2000);
+                    tv.setMaxHeight(end);
+                    tv.setGravity(expanding
+                        ? android.view.Gravity.TOP
+                        : android.view.Gravity.BOTTOM);
+                    // 高度变化后请求重绘，避免内容残留
+                    tv.postInvalidate();
+                }
+            });
+            anim.start();
         });
         container.addView(v);
     }
@@ -243,8 +294,6 @@ public class AiChatAdapter extends RecyclerView.Adapter<AiChatAdapter.VH> {
                     bindAiText(h, msg, pos);
                     // 状态通常在更新 text 时也会改变
                     h.aiStatusRow.setVisibility(msg.thinking ? View.VISIBLE : View.GONE);
-                } else if ("think_expand".equals(payload)) {
-                    bindAiText(h, msg, pos);
                 } else if ("status".equals(payload)) {
                     h.aiStatusRow.setVisibility(msg.thinking ? View.VISIBLE : View.GONE);
                     h.tvAiStatusText.setText(msg.statusText != null ? msg.statusText : h.itemView.getContext().getString(R.string.ai_thinking_dots));
