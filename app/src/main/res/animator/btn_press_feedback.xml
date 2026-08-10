@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 按钮按压反馈：按下缩小到 0.97，抬起回弹（强 ease-out，120ms） -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="true" android:state_pressed="true">
+        <set>
+            <objectAnimator
+                android:propertyName="scaleX"
+                android:duration="120"
+                android:valueTo="0.97"
+                android:valueType="floatType"
+                android:interpolator="@interpolator/ease_out_strong" />
+            <objectAnimator
+                android:propertyName="scaleY"
+                android:duration="120"
+                android:valueTo="0.97"
+                android:valueType="floatType"
+                android:interpolator="@interpolator/ease_out_strong" />
+        </set>
+    </item>
+    <item android:state_enabled="true">
+        <set>
+            <objectAnimator
+                android:propertyName="scaleX"
+                android:duration="160"
+                android:valueTo="1"
+                android:valueType="floatType"
+                android:interpolator="@interpolator/ease_out_strong" />
+            <objectAnimator
+                android:propertyName="scaleY"
+                android:duration="160"
+                android:valueTo="1"
+                android:valueType="floatType"
+                android:interpolator="@interpolator/ease_out_strong" />
+        </set>
+    </item>
+</selector>

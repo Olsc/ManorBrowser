@@ -647,7 +647,7 @@ public class MainActivity extends AppCompatActivity {
                    }
                }
                
-               if (tabInfo != null && tabInfo.url != null && !tabInfo.url.equals("about:blank") && !isLordMode) {
+               if (tabInfo != null && tabInfo.url != null && !tabInfo.url.equals("about:blank") && !tabInfo.url.startsWith("moz-extension://") && !isLordMode) {
                    final TabInfo finalTab = tabInfo;
                    mainHandler.removeCallbacksAndMessages(session);
                    mainHandler.postAtTime(() -> {
@@ -1196,7 +1196,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public GeckoResult<String> onLoadError(@NonNull GeckoSession session, @Nullable String uri, @NonNull org.mozilla.geckoview.WebRequestError error) {
                 // 1. 允许内部资源和关于页通过（防止重定向到 404 或 offline 导致循环或拦截失效）
-                if (uri != null && (uri.startsWith("resource://") || uri.startsWith("about:") || uri.startsWith("view-source:"))) {
+                if (uri != null && (uri.startsWith("resource://") || uri.startsWith("about:") || uri.startsWith("view-source:") || uri.startsWith("moz-extension://"))) {
                     return GeckoResult.fromValue(null);
                 }
 
@@ -1401,6 +1401,72 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         updateHomeButton();
+        // 旋转后 RecyclerView 尺寸变化，仅当切换器可见时重算卡片宽度并刷新
+        if (isTabSwitcherVisible) {
+            recalcTabCardSize();
+        }
+    }
+
+    /** 上次重算的卡片宽度与 padding，尺寸未变时跳过全量刷新 */
+    private int lastCardWidth = -1;
+    private int lastTabPadding = -1;
+    /** 是否已注册布局监听（防止重复注册累积） */
+    private boolean layoutListenerRegistered = false;
+
+    /**
+     * 按 tabSwitcher 容器实际尺寸重算卡片宽度（切换器打开/旋转后调用）。
+     * 注意：必须等 tabSwitcher 可见且布局完成（getHeight() > 0）才生效，
+     * 否则用全屏高度估算会造成卡片比例错误。
+     */
+    private void recalcTabCardSize() {
+        if (tabSwitcher == null || tabSwitcherAdapter == null) return;
+        // 若尚未布局完成，等布局后再重算（首次打开时 post 里的 getHeight() 可能仍为 0）
+        if (tabSwitcher.getHeight() <= 0) {
+            if (!layoutListenerRegistered) {
+                layoutListenerRegistered = true;
+                tabSwitcher.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                    @Override
+                    public void onLayoutChange(View v, int l, int t, int r, int b,
+                                               int oldL, int oldT, int oldR, int oldB) {
+                        if (b - t > 0) {
+                            v.removeOnLayoutChangeListener(this);
+                            layoutListenerRegistered = false;
+                            doRecalcTabCardSize();
+                        }
+                    }
+                });
+            }
+            return;
+        }
+        doRecalcTabCardSize();
+    }
+
+    private void doRecalcTabCardSize() {
+        tabSwitcher.post(() -> {
+            int realHeight = tabSwitcher.getHeight();
+            if (realHeight <= 0) return;
+            android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+            float density = dm.density;
+            float screenRatio = (float) dm.widthPixels / dm.heightPixels;
+            // 卡片可用高度 = 容器高度 - 上下 margin（32dp * 2）
+            int realCardHeight = realHeight - (int) (64 * density);
+            int realWidth = (int) (realCardHeight * screenRatio);
+            int maxWidth = (int) (dm.widthPixels * 0.85f);
+            if (realWidth > maxWidth) realWidth = maxWidth;
+            // 居中 padding：左 padding = 右 padding = (屏幕宽 - 卡片宽) / 2
+            int padding = (dm.widthPixels - realWidth) / 2;
+            // 尺寸未变则跳过，避免打断 LinearSnapHelper 状态与用户浏览位置
+            if (realWidth == lastCardWidth && padding == lastTabPadding) return;
+            lastCardWidth = realWidth;
+            lastTabPadding = padding;
+            tabSwitcherAdapter.setCardWidth(realWidth);
+            tabSwitcher.setPadding(padding, 0, padding, 0);
+            tabSwitcherAdapter.notifyDataSetChanged();
+            if (currentTabIndex >= 0 && currentTabIndex < tabs.size()) {
+                tabSwitcher.getLayoutManager().scrollToPosition(currentTabIndex);
+            }
+            updateTabAnimations();
+        });
     }
     
     @Override
@@ -1514,16 +1580,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTabClose(int position) {
                 closeTab(position);
-                tabSwitcher.postDelayed(this::updateCardScales, 300);
+                // 删除后立即重算卡片动画（缩放/位移/z 顺序），不再等 300ms 的 scrollBy 空转
+                tabSwitcher.post(() -> {
+                    updateTabAnimations();
+                    updateTabCount();
+                });
             }
             @Override
             public void onTabLongPress(int position) {
                 showTabEditDialog(position);
-            }
-            private void updateCardScales() {
-                 if (tabSwitcher.getLayoutManager() != null) {
-                     tabSwitcher.scrollBy(0,0);
-                 }
             }
         });
         final androidx.recyclerview.widget.LinearLayoutManager layoutManager =
@@ -1534,14 +1599,19 @@ public class MainActivity extends AppCompatActivity {
         tabSwitcher.setClipChildren(false);
         tabSwitcher.setOverScrollMode(View.OVER_SCROLL_NEVER);
         android.util.DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float density = displayMetrics.density;
+        // 卡片宽度在切换器打开时按容器真实高度计算（recalcTabCardSize），
+        // 这里仅以全屏高度估算初始 padding，避免首次布局异常
         int screenWidth = displayMetrics.widthPixels;
         float screenRatio = (float) screenWidth / displayMetrics.heightPixels;
-        float density = displayMetrics.density;
-        int cardHeight = displayMetrics.heightPixels - (int) (64 * density);
-        int cardWidthPx = (int) (cardHeight * screenRatio);
+        int estCardHeight = displayMetrics.heightPixels - (int) (64 * density);
+        int estCardWidth = (int) (estCardHeight * screenRatio);
         int maxWidth = (int) (screenWidth * 0.85f);
-        if (cardWidthPx > maxWidth) cardWidthPx = maxWidth;
-        int padding = (screenWidth - cardWidthPx) / 2;
+        if (estCardWidth > maxWidth) estCardWidth = maxWidth;
+        if (tabSwitcherAdapter != null) {
+            tabSwitcherAdapter.setCardWidth(estCardWidth);
+        }
+        int padding = (screenWidth - estCardWidth) / 2;
         tabSwitcher.setPadding(padding, 0, padding, 0);
         final int overlapPx = (int) (110 * displayMetrics.density);
         tabSwitcher.addItemDecoration(new RecyclerView.ItemDecoration() {
@@ -1667,6 +1737,13 @@ public class MainActivity extends AppCompatActivity {
             if (isProcessingAction) return;
             GeckoSession session = getCurrentSession();
             if (session != null) {
+                // 扩展页(moz-extension://)的 goBack 会触发引擎跨边界历史切换,导致 libxul 原生崩溃
+                // 此处改为关闭扩展标签页,回到之前的普通页面
+                if (isExtensionPageUrl(getCurrentTabUrl())) {
+                    closeExtensionTabAndSwitch();
+                    return;
+                }
+                mainHandler.removeCallbacksAndMessages(session);
                 session.goBack();
             }
         });
@@ -1825,15 +1902,21 @@ public class MainActivity extends AppCompatActivity {
                     currentTab = tabs.get(currentTabIndex);
                 }
 
-                // 2. 页面内后退逻辑
+                // 2. 扩展页(moz-extension://)返回：直接关闭标签，避免引擎跨边界历史切换导致 libxul 崩溃
+                if (currentTab != null && isExtensionPageUrl(currentTab.url)) {
+                    closeExtensionTabAndSwitch();
+                    return;
+                }
+                // 3. 页面内后退逻辑（后退前清除待执行的 JS 注入，防止与 goBack 并发操作导致 libxul 崩溃）
                 if (currentTab != null && currentTab.session != null && currentTab.canGoBack) {
+                    mainHandler.removeCallbacksAndMessages(currentTab.session);
                     currentTab.session.goBack();
                 } 
-                // 3. 页面无法后退时，如果不在主页，则先返回主页（响应用户要求返回主页的诉求）
+                // 4. 页面无法后退时，如果不在主页，则先返回主页（响应用户要求返回主页的诉求）
                 else if (currentTab != null && !Config.URL_BLANK.equals(currentTab.url)) {
                     loadUrlInCurrentTab(Config.URL_BLANK);
                 } 
-                // 4. 已在主页且无法后退，执行退出确认逻辑
+                // 5. 已在主页且无法后退，执行退出确认逻辑
                 else {
                     long currentTime = System.currentTimeMillis();
                     if (currentTime - lastBackTime < 2000) {
@@ -1907,8 +1990,8 @@ public class MainActivity extends AppCompatActivity {
     private void resetPageLoadTimeout(TabInfo tab, String url) {
         if (tab == null || tab.session == null) return;
         
-        // 如果是本地资源页，不设置超时
-        if (url != null && url.startsWith("resource://android/assets/")) {
+        // 如果是本地资源页或扩展页，不设置超时
+        if (url != null && (url.startsWith("resource://android/assets/") || url.startsWith("moz-extension://"))) {
             cancelPageLoadTimeout(tab);
             return;
         }
@@ -1929,7 +2012,7 @@ public class MainActivity extends AppCompatActivity {
                         // 如果超时后还在加载 (进度未达 100) 且 UI 指示正在加载
                         if (progressBar != null && progressBar.getVisibility() == View.VISIBLE && tab.lastProgress < 100) {
                             tab.session.stop();
-                            String timeoutUrl = "resource://android/assets/timeout.html";
+                            String timeoutUrl = "resource://android/assets/html/timeout.html";
                             if (url != null && !url.isEmpty()) {
                                 timeoutUrl += "?url=" + android.net.Uri.encode(url);
                             }
@@ -1969,7 +2052,7 @@ public class MainActivity extends AppCompatActivity {
         if (currentTab == null || currentTab.session == null) return;
 
         String currentUrl = currentTab.url;
-        if (currentUrl != null && currentUrl.startsWith("resource://android/assets/timeout.html")) {
+        if (currentUrl != null && currentUrl.startsWith("resource://android/assets/html/timeout.html")) {
             android.net.Uri uri = android.net.Uri.parse(currentUrl);
             String originalUrl = uri.getQueryParameter("url");
             if (originalUrl != null && !originalUrl.isEmpty()) {
@@ -1987,25 +2070,35 @@ public class MainActivity extends AppCompatActivity {
         if (btnStop == null) return;
         
         runOnUiThread(() -> {
+            boolean reduce = com.olsc.manorbrowser.utils.Motion.isReduceMotion(MainActivity.this);
             if (show) {
                 if (btnStop.getVisibility() != View.VISIBLE) {
                     btnStop.setVisibility(View.VISIBLE);
                     btnStop.setAlpha(0f);
-                    btnStop.setTranslationX(-20f);
+                    // 强 ease-out 滑入，无廉价回弹；进出对称（±20dp）
+                    btnStop.setTranslationX(reduce ? 0f : -20f);
                     btnStop.animate()
                            .alpha(1f)
                            .translationX(0f)
-                           .setDuration(300)
-                           .setInterpolator(new android.view.animation.OvershootInterpolator())
+                           .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                               MainActivity.this, com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH))
+                           .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
                            .start();
                 }
             } else {
                 if (btnStop.getVisibility() == View.VISIBLE) {
                     btnStop.animate()
                            .alpha(0f)
-                           .translationX(50f)
-                           .setDuration(300)
-                           .withEndAction(() -> btnStop.setVisibility(View.GONE))
+                           .translationX(reduce ? 0f : 20f)
+                           .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                               MainActivity.this, com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH))
+                           .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                           .withEndAction(() -> {
+                               // 若中途被新的显示动画打断（alpha 已被拉高），不置 GONE
+                               if (btnStop.getAlpha() < 0.5f) {
+                                   btnStop.setVisibility(View.GONE);
+                               }
+                           })
                            .start();
                 }
             }
@@ -2057,14 +2150,45 @@ public class MainActivity extends AppCompatActivity {
             TabInfo tab = tabs.get(currentTabIndex);
             boolean isHome = Config.URL_BLANK.equals(tab.url);
             if (isHome) {
+                boolean wasHidden = layoutHome.getVisibility() != View.VISIBLE;
                 geckoView.setVisibility(View.GONE);
                 layoutHome.setVisibility(View.VISIBLE);
                 urlInput.setText("");
+                // 仅当刚从隐藏变为显示时淡入，避免加载过程中的反复调用重置动画
+                if (wasHidden && !com.olsc.manorbrowser.utils.Motion.isReduceMotion(this)) {
+                    layoutHome.setAlpha(0f);
+                    layoutHome.animate()
+                        .alpha(1f)
+                        .setDuration(com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH)
+                        .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                        .start();
+                    // 低频 delight：logo 轻微上浮 + 淡入（从切换器回到首页时）
+                    View logo = layoutHome.findViewById(R.id.home_logo);
+                    if (logo != null) {
+                        logo.setAlpha(0f);
+                        logo.setTranslationY(dp8());
+                        logo.animate()
+                            .alpha(1f)
+                            .translationY(0f)
+                            .setStartDelay(40)
+                            .setDuration(com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH)
+                            .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                            .start();
+                    }
+                } else {
+                    layoutHome.setAlpha(1f);
+                    View logo = layoutHome.findViewById(R.id.home_logo);
+                    if (logo != null) {
+                        logo.setAlpha(1f);
+                        logo.setTranslationY(0f);
+                    }
+                }
                 // 主页强制显示 Bar，但不应该退出全屏模式的全域标志
                 setBarsVisible(true);
             } else {
                 geckoView.setVisibility(View.VISIBLE);
                 layoutHome.setVisibility(View.GONE);
+                layoutHome.setAlpha(1f);
                 // 仅在非主页时，根据全屏标志来决定。
                 // 即使正在加载下一页，如果 mode 为 true，就该保持。
                 if (isFullScreenMode) {
@@ -2123,48 +2247,39 @@ public class MainActivity extends AppCompatActivity {
             }
             currentTabIndex = newFocusIndex;
             final int targetIndex = newFocusIndex;
-            
-            // 当标签页数量较少时（<=2），使用notifyDataSetChanged确保布局完全重建
-            // 避免notifyItemRemoved导致的布局状态不一致问题
-            if (tabs.size() <= 2) {
-                if (tabSwitcherAdapter != null) {
-                    tabSwitcherAdapter.notifyDataSetChanged();
-                }
-                // 等待布局完全重建后再滚动到目标位置
-                tabSwitcher.post(() -> {
-                    tabSwitcher.post(() -> {
-                        if (tabSwitcher.getLayoutManager() != null) {
-                            tabSwitcher.smoothScrollToPosition(targetIndex);
-                            tabSwitcher.postDelayed(() -> {
-                                updateTabAnimations();
-                                updateTabCount();
-                            }, 100);
-                        }
-                    });
-                });
-            } else {
-                // 标签页数量较多时，使用增量更新提高性能
-                if (tabSwitcherAdapter != null) {
-                    tabSwitcherAdapter.notifyItemRemoved(position);
-                    tabSwitcherAdapter.notifyItemRangeChanged(position, tabs.size() - position);
-                }
-                // 使用多次post确保布局完全更新后再滚动
-                tabSwitcher.post(() -> {
-                    if (tabSwitcher.getLayoutManager() != null) {
-                        tabSwitcher.post(() -> {
-                            tabSwitcher.smoothScrollToPosition(targetIndex);
-                            tabSwitcher.postDelayed(() -> {
-                                updateTabAnimations();
-                                updateTabCount();
-                            }, 50);
-                        });
-                    }
-                });
+
+            // 统一使用 notifyItemRemoved（不用 notifyDataSetChanged，避免打断 ItemTouchHelper 的删除动画）
+            if (tabSwitcherAdapter != null) {
+                tabSwitcherAdapter.notifyItemRemoved(position);
             }
+            // 等 ItemTouchHelper 删除动画(~250ms)结束后再修正位置，
+            // 避免与 LinearSnapHelper 吸附竞争导致"滑不到头"或跳动
+            tabSwitcher.postDelayed(() -> {
+                if (tabSwitcher.getLayoutManager() != null) {
+                    tabSwitcher.getLayoutManager().scrollToPosition(targetIndex);
+                }
+                updateTabAnimations();
+                updateTabCount();
+                updateBottomTabCounter();
+            }, 260L);
         }
-        updateTabCount();
-        updateBottomTabCounter();
     }
+
+    /**
+     * 关闭当前扩展标签页(moz-extension://)并切换显示到新焦点标签。
+     * 扩展页 goBack 会触发引擎跨边界历史切换导致 libxul 崩溃，因此返回操作改为关闭标签。
+     * closeTab 仅更新 currentTabIndex 不切换显示，这里补一次 switchToTab 确保 geckoView 绑定正确 session。
+     */
+    private void closeExtensionTabAndSwitch() {
+        if (currentTabIndex < 0 || currentTabIndex >= tabs.size()) return;
+        int closingIndex = currentTabIndex;
+        closeTab(closingIndex);
+        // closeTab 后 currentTabIndex 已指向新焦点标签；若还有标签则切换显示
+        if (currentTabIndex >= 0 && currentTabIndex < tabs.size()) {
+            switchToTab(currentTabIndex);
+        }
+    }
+
     private void updateTabAnimations() {
         if (tabSwitcher.getChildCount() == 0) return;
         float centerX = tabSwitcher.getWidth() / 2f;
@@ -2388,31 +2503,43 @@ public class MainActivity extends AppCompatActivity {
             btnAddTab.setVisibility(View.VISIBLE);
             btnMenu.setVisibility(View.GONE);
             tvTabCount.setVisibility(View.VISIBLE);
+            // 切换器可见且布局完成后，按容器真实高度重算卡片宽度并定位当前标签
+            recalcTabCardSize();
             if (currentTabIndex >= 0 && currentTabIndex < tabs.size()) {
-                tabSwitcher.post(() -> {
-                    if (tabSwitcherAdapter != null) {
-                        tabSwitcherAdapter.notifyDataSetChanged();
-                    }
-                    if (tabSwitcher.getLayoutManager() != null) {
-                        // 使用smoothScrollToPosition确保正确居中，修复标签页无法居中的BUG
-                        tabSwitcher.smoothScrollToPosition(currentTabIndex);
-                    }
-                    tabSwitcher.postDelayed(() -> {
+                tabSwitcher.postDelayed(() -> {
                          updateTabAnimations();
                          updateTabCount();
+                         // 材质化进入：轻微上浮 + 淡入，强 ease-out
+                         tabSwitcher.setScaleX(0.96f);
+                         tabSwitcher.setScaleY(0.96f);
+                         tabSwitcher.setTranslationY(dp8());
                          tabSwitcher.animate()
                              .alpha(1f)
-                             .setDuration(200)
+                             .scaleX(1f)
+                             .scaleY(1f)
+                             .translationY(0f)
+                             .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                                 MainActivity.this, com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH))
+                             .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
                              .start();
                     }, 100);
-                });
             } else {
-                 tabSwitcher.animate().alpha(1f).setDuration(200).start();
+                 // 打开：淡入 + 轻微缩放（跳过卡片居中后置）
+                 tabSwitcher.setScaleX(0.96f);
+                 tabSwitcher.setScaleY(0.96f);
+                 tabSwitcher.setTranslationY(dp8());
+                 tabSwitcher.animate()
+                     .alpha(1f)
+                     .scaleX(1f)
+                     .scaleY(1f)
+                     .translationY(0f)
+                     .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                         MainActivity.this, com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH))
+                     .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                     .start();
             }
         } else {
             if (dynamicBgView != null) dynamicBgView.setVisibility(View.GONE);
-            tabSwitcher.setVisibility(View.GONE);
-            tabSwitcher.setAlpha(1f);
             btnAddTab.setVisibility(View.GONE);
             btnMenu.setVisibility(View.VISIBLE);
             tvTabCount.setVisibility(View.GONE);
@@ -2424,17 +2551,43 @@ public class MainActivity extends AppCompatActivity {
                     View layoutHome = findViewById(R.id.layout_home);
                     geckoView.setVisibility(View.GONE);
                     layoutHome.setVisibility(View.VISIBLE);
-                    layoutHome.setAlpha(1f);
+                    // 首页淡入
+                    layoutHome.setAlpha(0f);
+                    layoutHome.animate()
+                        .alpha(1f)
+                        .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                            MainActivity.this, com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH))
+                        .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                        .start();
                     updateViewVisibility();
                 } else {
                     findViewById(R.id.layout_home).setVisibility(View.GONE);
                     geckoView.setVisibility(View.VISIBLE);
-                    geckoView.setAlpha(1f);
                 }
             } else {
                 geckoView.setVisibility(View.VISIBLE);
                 geckoView.setAlpha(1f);
             }
+            // 标签切换器淡出（对称路径），结束后再隐藏
+            final View switcher = tabSwitcher;
+            switcher.animate()
+                .alpha(0f)
+                .scaleX(0.97f)
+                .scaleY(0.97f)
+                .translationY(dp8())
+                .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                    MainActivity.this, com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH))
+                .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                .withEndAction(() -> {
+                    // 若动画期间被新的打开操作打断（isTabSwitcherVisible 已变 true），不隐藏
+                    if (isTabSwitcherVisible) return;
+                    switcher.setVisibility(View.GONE);
+                    switcher.setAlpha(1f);
+                    switcher.setScaleX(1f);
+                    switcher.setScaleY(1f);
+                    switcher.setTranslationY(0f);
+                })
+                .start();
             updateViewVisibility();
         }
     }
@@ -2553,6 +2706,22 @@ public class MainActivity extends AppCompatActivity {
             return tabs.get(currentTabIndex);
         }
         return null;
+    }
+
+    /** 当前标签页的 URL */
+    private String getCurrentTabUrl() {
+        TabInfo tab = getCurrentTab();
+        return tab != null ? tab.url : null;
+    }
+
+    /** 是否为扩展页面 URL(moz-extension://)。此类页面 goBack 会触发引擎跨边界历史切换,导致 libxul 崩溃 */
+    private boolean isExtensionPageUrl(String url) {
+        return url != null && url.startsWith("moz-extension://");
+    }
+
+    /** 8dp 像素值（动画位移用） */
+    private float dp8() {
+        return 8 * getResources().getDisplayMetrics().density;
     }
     private void updateTabCount() {
         TextView tvTabCount = findViewById(R.id.tv_tab_count);
@@ -2907,8 +3076,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         android.view.ViewGroup root = findViewById(R.id.drawer_layout);
-        // 使用简单的 Transition 动画
-        android.transition.TransitionManager.beginDelayedTransition(root);
+        // 纯淡入淡出过渡（不含 changeBounds，避免 contentContainer padding 硬切被动画化导致闪烁），强 ease-out
+        android.transition.TransitionSet transition = new android.transition.TransitionSet();
+        transition.addTransition(new android.transition.Fade(android.transition.Fade.OUT));
+        transition.addTransition(new android.transition.Fade(android.transition.Fade.IN));
+        transition.setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT);
+        transition.setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+            this, com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH));
+        android.transition.TransitionManager.beginDelayedTransition(root, transition);
 
         topBar.setVisibility(visible ? View.VISIBLE : View.GONE);
         bottomBar.setVisibility(visible ? View.VISIBLE : View.GONE);
@@ -3045,8 +3220,18 @@ public class MainActivity extends AppCompatActivity {
         final android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_item, folderNames);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerFolder.setAdapter(adapter);
-        final android.widget.Button btnNewFolder = new android.widget.Button(this);
+        final com.google.android.material.button.MaterialButton btnNewFolder = new com.google.android.material.button.MaterialButton(this);
         btnNewFolder.setText(R.string.title_new_folder);
+        btnNewFolder.setAllCaps(false);
+        btnNewFolder.setCornerRadius(24);
+        btnNewFolder.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+            androidx.core.content.ContextCompat.getColor(this, com.olsc.manorbrowser.R.color.purple_500)));
+        btnNewFolder.setTextColor(android.graphics.Color.WHITE);
+        android.view.ViewGroup.MarginLayoutParams folderBtnLp = new android.view.ViewGroup.MarginLayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        folderBtnLp.topMargin = (int)(12 * getResources().getDisplayMetrics().density);
+        btnNewFolder.setLayoutParams(folderBtnLp);
         layout.addView(btnNewFolder);
         
         btnNewFolder.setOnClickListener(v -> {
@@ -3624,7 +3809,14 @@ public class MainActivity extends AppCompatActivity {
             public void goBack() {
                 runOnUiThread(() -> {
                     GeckoSession session = getCurrentSession();
-                    if (session != null) session.goBack();
+                    if (session == null) return;
+                    // 扩展页(moz-extension://)的 goBack 会触发引擎跨边界历史切换,导致 libxul 原生崩溃
+                    if (isExtensionPageUrl(getCurrentTabUrl())) {
+                        closeExtensionTabAndSwitch();
+                        return;
+                    }
+                    mainHandler.removeCallbacksAndMessages(session);
+                    session.goBack();
                 });
             }
 
@@ -3632,7 +3824,10 @@ public class MainActivity extends AppCompatActivity {
             public void goForward() {
                 runOnUiThread(() -> {
                     GeckoSession session = getCurrentSession();
-                    if (session != null) session.goForward();
+                    if (session != null) {
+                        mainHandler.removeCallbacksAndMessages(session);
+                        session.goForward();
+                    }
                 });
             }
 

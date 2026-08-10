@@ -179,13 +179,13 @@ public class SettingsActivity extends AppCompatActivity {
                     if (tvAiStatus != null && aiClient != null) {
                         if (!aiClient.isRunning()) {
                             tvAiStatus.setText(R.string.msg_ai_not_started);
-                            tvAiStatus.setTextColor(android.graphics.Color.GRAY);
+                            tvAiStatus.setTextColor(androidx.core.content.ContextCompat.getColor(SettingsActivity.this, R.color.text_secondary));
                         } else if (aiClient.isLastPollSuccessful()) {
                             tvAiStatus.setText(R.string.msg_ai_connected);
-                            tvAiStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+                            tvAiStatus.setTextColor(androidx.core.content.ContextCompat.getColor(SettingsActivity.this, R.color.success_green));
                         } else {
                             tvAiStatus.setText(R.string.msg_ai_connecting);
-                            tvAiStatus.setTextColor(android.graphics.Color.parseColor("#FF5252"));
+                            tvAiStatus.setTextColor(androidx.core.content.ContextCompat.getColor(SettingsActivity.this, R.color.danger_red));
                         }
                     }
                     statusHandler.postDelayed(this, 1000);

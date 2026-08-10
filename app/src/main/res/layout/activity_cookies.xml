@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        android:background="@color/background_surface"
-        android:elevation="4dp"
+        android:background="@drawable/bg_glass_bar"
+        android:elevation="0dp"
         app:title="@string/title_cookies"
         app:titleTextColor="@color/text_primary" />
 
@@ -46,7 +46,7 @@
             app:icon="@drawable/ic_menu"
             android:textColor="#FFFFFF"
             app:iconTint="#FFFFFF"
-            app:backgroundColor="#FF5252" />
+            app:backgroundColor="@color/danger_red" />
 
     </FrameLayout>
 

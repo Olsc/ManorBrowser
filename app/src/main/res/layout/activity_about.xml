@@ -5,9 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/windowBackground">
+    android:background="@color/background_main">
 
-
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_about"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:background="@drawable/bg_glass_bar"
+        android:elevation="0dp"
+        app:title="@string/title_about"
+        app:titleTextColor="@color/text_primary"
+        app:navigationIcon="@drawable/ic_back"
+        app:navigationIconTint="@color/icon_main" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -49,7 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="?android:attr/colorBackground">
 
@@ -82,7 +92,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#1A000000"
+                        android:background="@color/divider_color"
                         android:layout_marginHorizontal="16dp" />
 
                     <!-- License -->
@@ -107,7 +117,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#1A000000"
+                        android:background="@color/divider_color"
                         android:layout_marginHorizontal="16dp" />
 
                     <!-- App Version -->
@@ -134,7 +144,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#1A000000"
+                        android:background="@color/divider_color"
                         android:layout_marginHorizontal="16dp" />
 
                     <!-- GeckoView Version -->
@@ -161,7 +171,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#1A000000"
+                        android:background="@color/divider_color"
                         android:layout_marginHorizontal="16dp" />
 
                     <!-- Android SDK Version -->
@@ -188,7 +198,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#1A000000"
+                        android:background="@color/divider_color"
                         android:layout_marginHorizontal="16dp" />
 
                     <!-- Source Code -->

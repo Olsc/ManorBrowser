@@ -13,8 +13,7 @@ public class TabSwipeCallback extends ItemTouchHelper.SimpleCallback {
     public interface OnSwipeListener {
         void onSwiped(int position);
     }
-    private final OnSwipeListener listener;
-    public TabSwipeCallback(OnSwipeListener listener) {
+    private final OnSwipeListener listener;    public TabSwipeCallback(OnSwipeListener listener) {
         super(0, ItemTouchHelper.UP);
         this.listener = listener;
     }
@@ -24,7 +23,16 @@ public class TabSwipeCallback extends ItemTouchHelper.SimpleCallback {
     }
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-        listener.onSwiped(viewHolder.getBindingAdapterPosition());
+        // 删除动画播放期间 position 可能变为 NO_POSITION，用最终布局位置
+        int pos = viewHolder.getBindingAdapterPosition();
+        if (pos == RecyclerView.NO_POSITION) {
+            pos = viewHolder.getLayoutPosition();
+        }
+        if (pos != RecyclerView.NO_POSITION) {
+            // 同步移除数据：ItemTouchHelper 会在 onSwiped 后自行衔接剩余卡片动画。
+            // 不可 post 延迟——延迟期间用户可再滑其他卡，导致 position 错位成"幽灵卡"。
+            listener.onSwiped(pos);
+        }
     }
     @Override
     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,

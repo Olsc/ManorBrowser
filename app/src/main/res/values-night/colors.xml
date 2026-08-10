@@ -5,14 +5,27 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <color name="black">#FFFFFFFF</color>
-    <color name="white">#FF000000</color>
-    <color name="background_main">#121212</color>
-    <color name="background_surface">#1E1E1E</color>
-    <color name="text_primary">#E1E1E1</color>
-    <color name="text_secondary">#9E9E9E</color>
-    <color name="icon_main">#FFFFFF</color>
-    <color name="divider_color">#333333</color>
-    <color name="search_bar_bg">#2C2C2C</color>
-    <color name="card_bg">#252525</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- 基础表面色（深色模式） -->
+    <color name="background_main">#141218</color>
+    <color name="background_surface">#1E1B26</color>
+    <color name="text_primary">#E8E4F0</color>
+    <color name="text_secondary">#A29CAE</color>
+    <color name="icon_main">#F0EDF7</color>
+    <color name="divider_color">#2E2A38</color>
+    <color name="search_bar_bg">#2C2836</color>
+    <color name="card_bg">#25212E</color>
+
+    <!-- 液态玻璃（Glassmorphism）质感色（深色模式） -->
+    <color name="glass_bg">#CC25212E</color>
+    <color name="glass_bg_strong">#E625212E</color>
+    <color name="glass_stroke">#33FFFFFF</color>
+    <color name="glass_shadow">#40000000</color>
+
+    <!-- 功能色 -->
+    <color name="danger_red">#FF5252</color>
+    <color name="success_green">#4CAF50</color>
+    <color name="icon_tint_blue">#5C6BC0</color>
 </resources>

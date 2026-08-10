@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        android:background="@color/background_surface"
-        android:elevation="4dp"
+        android:background="@drawable/bg_glass_bar"
+        android:elevation="0dp"
         app:title="@string/action_manage_extensions"
         app:titleTextColor="@color/text_primary"
         app:navigationIcon="@drawable/ic_back"
@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/msg_no_extensions"
-            android:textColor="#9E9E9E"
+            android:textColor="@color/text_secondary"
             android:textSize="16sp"
             android:visibility="gone" />
 

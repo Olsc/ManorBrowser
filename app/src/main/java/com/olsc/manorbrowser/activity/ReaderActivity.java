@@ -7,8 +7,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.SeekBar;
@@ -98,20 +96,51 @@ public class ReaderActivity extends AppCompatActivity {
     
     private void toggleControlPanel() {
         isExpanded = !isExpanded;
-        
-        // 旋转箭头动画
-        RotateAnimation rotate = new RotateAnimation(
-            isExpanded ? -90 : 90,
-            isExpanded ? 90 : -90,
-            Animation.RELATIVE_TO_SELF, 0.5f,
-            Animation.RELATIVE_TO_SELF, 0.5f
-        );
-        rotate.setDuration(300);
-        rotate.setFillAfter(true);
-        expandIcon.startAnimation(rotate);
-        
-        // 展开/收起内容
-        controlContent.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+
+        // 旋转箭头动画（属性动画，无 fillAfter 残留状态；reduce 下直接切换）
+        boolean reduce = com.olsc.manorbrowser.utils.Motion.isReduceMotion(this);
+        if (reduce) {
+            expandIcon.setRotation(isExpanded ? 90f : -90f);
+        } else {
+            expandIcon.animate()
+                .rotation(isExpanded ? 90f : -90f)
+                .setDuration(com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH)
+                .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                .start();
+        }
+
+        // 展开/收起内容：淡入 + 轻微下移，而非硬切
+        if (isExpanded) {
+            controlContent.setVisibility(View.VISIBLE);
+            controlContent.setAlpha(0f);
+            controlContent.setTranslationY(reduce ? 0f : -dp8r());
+            controlContent.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                    this, com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH))
+                .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                .start();
+        } else {
+            controlContent.animate()
+                .alpha(0f)
+                .translationY(reduce ? 0f : dp8r())
+                .setDuration(com.olsc.manorbrowser.utils.Motion.scaledDuration(
+                    this, com.olsc.manorbrowser.utils.Motion.DURATION_SWITCH))
+                .setInterpolator(com.olsc.manorbrowser.utils.Motion.EASE_OUT)
+                .withEndAction(() -> {
+                    // 若动画期间被新的展开操作打断（isExpanded 已变 true），不隐藏
+                    if (isExpanded) return;
+                    controlContent.setVisibility(View.GONE);
+                    controlContent.setAlpha(1f);
+                    controlContent.setTranslationY(0f);
+                })
+                .start();
+        }
+    }
+
+    private float dp8r() {
+        return 8 * getResources().getDisplayMetrics().density;
     }
     private String formatContent(String content) {
         // 移除多余的空行

@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 书签卡片选择器：圆角 + 半透明玻璃底 + 涟漪 -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="#20000000">
+    android:color="#1F6200EE">
     <item>
         <shape>
-            <solid android:color="@color/card_bg" />
-            <corners android:radius="12dp" />
+            <solid android:color="@color/glass_bg_strong" />
+            <corners android:radius="16dp" />
+            <stroke
+                android:width="1dp"
+                android:color="@color/glass_stroke" />
         </shape>
     </item>
 </ripple>

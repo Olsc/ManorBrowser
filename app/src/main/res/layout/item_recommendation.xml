@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:background="?attr/selectableItemBackground"
-    android:padding="12dp"
+    android:padding="14dp"
     android:gravity="center_vertical">
 
     <ImageView
@@ -13,7 +13,7 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:src="@drawable/ic_history"
-        app:tint="@color/icon_main"
+        app:tint="@color/purple_500"
         android:layout_marginEnd="12dp" />
 
     <LinearLayout

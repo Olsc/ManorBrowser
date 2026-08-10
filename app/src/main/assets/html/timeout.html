@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>连接超时</title>
     <style>
         * {
@@ -17,77 +17,165 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
-            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+        }
+
+        :root {
+            --bg-1: #fff4e0;
+            --bg-2: #ffe9c7;
+            --bg-3: #fffaf0;
+            --text: #a04e00;
+            --text-soft: #b58a5e;
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.75);
+            --glass-shadow: 0 12px 40px rgba(230, 110, 0, 0.18);
+            --accent: #ff9800;
+            --accent-deep: #e65100;
+            --btn-text: #ffffff;
+            --orb-1: rgba(255, 152, 0, 0.35);
+            --orb-2: rgba(255, 183, 77, 0.35);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-1: #2b1c0d;
+                --bg-2: #332210;
+                --bg-3: #1e1509;
+                --text: #ffdfb0;
+                --text-soft: #d4b088;
+                --glass-bg: rgba(76, 52, 22, 0.45);
+                --glass-border: rgba(255, 152, 0, 0.35);
+                --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+                --accent: #ffb74d;
+                --accent-deep: #ff9800;
+                --orb-1: rgba(255, 152, 0, 0.3);
+                --orb-2: rgba(180, 110, 20, 0.28);
+            }
         }
 
         body {
-            background: linear-gradient(135deg, #fff3e0 0%, #fffde7 100%);
+            background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+            background-size: 400% 400%;
+            animation: flow 14s ease infinite;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #e65100;
+            color: var(--text);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .content {
+            position: relative;
+            z-index: 10;
             text-align: center;
-            padding: 20px;
-            animation: fadeIn 1s;
+            padding: 40px 32px;
+            width: 88%;
+            max-width: 420px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            box-shadow: var(--glass-shadow);
+            animation: fadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .icon {
-            font-size: 5rem;
-            margin-bottom: 1rem;
-            opacity: 0.8;
+            width: 84px;
+            height: 84px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+            box-shadow: 0 10px 24px rgba(255, 152, 0, 0.35);
+        }
+
+        .icon svg {
+            width: 44px;
+            height: 44px;
         }
 
         h1 {
-            font-size: 1.8rem;
-            font-weight: 400;
-            margin-bottom: 1rem;
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
         }
 
         p {
-            font-size: 1rem;
-            margin-bottom: 2.5rem;
-            opacity: 0.7;
+            font-size: 0.95rem;
+            margin-bottom: 28px;
+            opacity: 0.8;
+            color: var(--text-soft);
+            line-height: 1.7;
         }
 
         .btn-group {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn {
             text-decoration: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 0.9rem;
-            transition: all 0.3s;
+            padding: 13px 26px;
+            border-radius: 24px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            transition: all 0.25s ease;
             display: inline-block;
-            border: 1px solid rgba(230, 81, 0, 0.2);
-            color: #e65100;
+            border: 1px solid transparent;
+            cursor: pointer;
+            flex: 1;
+            min-width: 130px;
         }
 
         .btn-primary {
-            background: #e65100;
-            color: white;
-            border: none;
+            background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+            color: var(--btn-text);
+            box-shadow: 0 6px 18px rgba(255, 152, 0, 0.35);
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent-deep);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .btn-secondary {
+                color: var(--accent);
+            }
+        }
+
+        .btn:hover,
+        .btn:active {
+            transform: translateY(-2px) scale(1.02);
+            filter: brightness(1.08);
+        }
+
+        .btn:active {
+            transform: translateY(0) scale(0.98);
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(24px) scale(0.98);
             }
-
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
     </style>
@@ -95,12 +183,17 @@
 
 <body>
     <div class="content">
-        <div class="icon">⌛</div>
+        <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="13" r="8.5" stroke="#FFFFFF" stroke-width="2" fill="rgba(255,255,255,0.2)" />
+                <path d="M12 8.5V13l3.5 2.5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
         <h1 id="title">连接已超时</h1>
         <p id="msg">服务器响应太慢了，可能是访问的人太多，或者网址有误。</p>
         <div class="btn-group">
             <a href="javascript:location.reload()" class="btn btn-primary" id="btn-retry">再试一次</a>
-            <a href="404_game.html" class="btn" id="btn-game" target="_blank">玩个游戏等一下</a>
+            <a href="404_game.html" class="btn btn-secondary" id="btn-game" target="_blank">玩个小游戏</a>
         </div>
     </div>
     <script>
@@ -109,7 +202,7 @@
                 title: "连接已超时",
                 msg: "服务器响应太慢了，可能是访问的人太多，或者网址有误。",
                 btnRetry: "再试一次",
-                btnGame: "玩个游戏等一下",
+                btnGame: "玩个小游戏",
                 pageTitle: "加载超时"
             },
             en: {

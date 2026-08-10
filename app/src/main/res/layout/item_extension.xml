@@ -1,57 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="16dp"
-    android:gravity="center_vertical"
-    android:background="?selectableItemBackground">
-
-    <ImageView
-        android:id="@+id/iv_icon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="4dp"
-        android:src="@drawable/ic_menu"
-        app:tint="@color/icon_main"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:contentDescription="@string/action_manage_extensions"/>
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="1dp"
+    app:cardBackgroundColor="@color/background_surface">
 
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp">
+        android:orientation="horizontal"
+        android:padding="14dp"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tv_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/action_manage_extensions"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"/>
+        <ImageView
+            android:id="@+id/iv_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="10dp"
+            android:background="@drawable/bg_history_icon"
+            android:src="@drawable/ic_menu"
+            app:tint="@color/purple_500"
+            android:contentDescription="@string/action_manage_extensions" />
 
-        <TextView
-            android:id="@+id/tv_version"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/label_version_value"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"
-            android:layout_marginTop="4dp"/>
+            android:orientation="vertical"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp">
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/action_manage_extensions"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/tv_version"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/label_version_value"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btn_delete"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/ic_delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/danger_red"
+            android:contentDescription="@string/action_delete" />
+
     </LinearLayout>
 
-    <ImageButton
-        android:id="@+id/btn_delete"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/ic_delete"
-        android:background="?selectableItemBackgroundBorderless"
-        app:tint="#FF5252"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:contentDescription="@string/action_delete" />
-
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>
