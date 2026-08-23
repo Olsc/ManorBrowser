@@ -5,7 +5,7 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 appcompat = "1.8.0"
 material = "1.14.0"
-geckoview = "153.0.20260810162159"
+geckoview = "154.0.20260814215756"
 swiperefreshlayout = "1.2.0"
 preference = "1.2.1"
 
@@ -18,7 +18,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 geckoview = { module = "org.mozilla.geckoview:geckoview", version.ref = "geckoview" }
 swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "5.4.0" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "5.5.0" }
 zxing-core = { group = "com.google.zxing", name = "core", version = "3.5.4" }
 markwon = { group = "io.noties.markwon", name = "core", version = "4.6.2" }
 
