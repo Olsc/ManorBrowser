@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'com.olsc.manorbrowser'
-    compileSdk 36
+    compileSdk 37
 
     defaultConfig {
         applicationId "com.olsc.manorbrowser"
