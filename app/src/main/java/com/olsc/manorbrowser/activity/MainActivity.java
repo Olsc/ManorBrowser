@@ -315,6 +315,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * 判断目标 URI 是否属于常见人机验证、安全盾或验证码服务
+     * 针对此类请求，需豁免广告拦截、防追踪拦截以及弹窗限制，确保正常加载
+     */
+    public static boolean isVerificationUri(String uri) {
+        if (uri == null || uri.isEmpty()) return false;
+        String lower = uri.toLowerCase();
+        return lower.contains("challenges.cloudflare.com") ||
+               lower.contains("/cdn-cgi/challenge-platform/") ||
+               lower.contains("recaptcha") ||
+               lower.contains("hcaptcha.com") ||
+               lower.contains("geetest.com") ||
+               lower.contains("geevisit.com") ||
+               lower.contains("arkoselabs.com") ||
+               lower.contains("funcaptcha") ||
+               lower.contains("captcha.qq.com") ||
+               lower.contains("turing.captcha.qcloud.com") ||
+               lower.contains("dun.163.com") ||
+               lower.contains("cstaticdun.126.net") ||
+               lower.contains("dingxiang-inc.com") ||
+               lower.contains("vaptcha.com") ||
+               lower.contains("datadome.co") ||
+               lower.contains("turnstile");
+    }
+
+    /**
      * 强制弹窗显示隐私政策，仅在首次运行或未同意时调用
      */
     private void showPrivacyDialog() {
@@ -414,10 +439,11 @@ public class MainActivity extends AppCompatActivity {
                 .enterpriseRootsEnabled(true);
             
             // 配置全域内容屏蔽与防追踪 (ETP)
-            // 默认启用增强型追踪保护 (Strict)，有效屏蔽 90% 以上的广告脚本与弹窗脚本
+            // 使用 DEFAULT 级别防追踪，避免 STRICT 模式误杀 Cloudflare Turnstile、reCAPTCHA 等人机验证脚本
             builder.contentBlocking(new ContentBlocking.Settings.Builder()
-                .antiTracking(ContentBlocking.AntiTracking.STRICT)
+                .antiTracking(ContentBlocking.AntiTracking.DEFAULT)
                 .safeBrowsing(ContentBlocking.SafeBrowsing.DEFAULT)
+                .cookieBehavior(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
                 .build());
             
             sRuntime = GeckoRuntime.create(getApplicationContext(), builder.build());
@@ -647,7 +673,7 @@ public class MainActivity extends AppCompatActivity {
                    }
                }
                
-               if (tabInfo != null && tabInfo.url != null && !tabInfo.url.equals("about:blank") && !tabInfo.url.startsWith("moz-extension://") && !isLordMode) {
+               if (tabInfo != null && tabInfo.url != null && !tabInfo.url.equals("about:blank") && !tabInfo.url.startsWith("moz-extension://") && !isVerificationUri(tabInfo.url) && !isLordMode) {
                    final TabInfo finalTab = tabInfo;
                    mainHandler.removeCallbacksAndMessages(session);
                    mainHandler.postAtTime(() -> {
@@ -818,7 +844,20 @@ public class MainActivity extends AppCompatActivity {
 
              @Override public void onFocusRequest(@NonNull GeckoSession session) {}
              @Override public void onFullScreen(@NonNull GeckoSession session, boolean fullScreen) {}
-             @Override public void onCloseRequest(@NonNull GeckoSession session) {}
+             @Override
+             public void onCloseRequest(@NonNull GeckoSession session) {
+                 runOnUiThread(() -> {
+                     for (int i = 0; i < tabs.size(); i++) {
+                         if (tabs.get(i).session == session) {
+                             closeTab(i);
+                             if (currentTabIndex >= 0 && currentTabIndex < tabs.size()) {
+                                 switchToTab(currentTabIndex);
+                             }
+                             break;
+                         }
+                     }
+                 });
+             }
              @Override
              public void onContextMenu(@NonNull GeckoSession session, int screenX, int screenY, @NonNull ContextElement element) {
                  lastX = screenX;
@@ -857,6 +896,10 @@ public class MainActivity extends AppCompatActivity {
                     });
                     return result;
                 } else if (isLordMode && perm.permission == GeckoSession.PermissionDelegate.PERMISSION_PERSISTENT_STORAGE) {
+                    // 人机验证服务相关的存储请求直接放行，避免弹窗中断验证
+                    if (isVerificationUri(perm.uri)) {
+                        return GeckoResult.fromValue(GeckoSession.PermissionDelegate.ContentPermission.VALUE_ALLOW);
+                    }
                     final GeckoResult<Integer> result = new GeckoResult<>();
                     runOnUiThread(() -> {
                         new com.google.android.material.dialog.MaterialAlertDialogBuilder(MainActivity.this)
@@ -1275,46 +1318,66 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public GeckoResult<GeckoSession> onNewSession(@NonNull GeckoSession session, @NonNull String uri) {
-                // 1. 无效或基础跳转拦截
-                if (uri == null || uri.isEmpty() || "about:blank".equals(uri) || uri.startsWith("data:")) {
-                    return GeckoResult.fromValue(null);
-                }
-                
-                // 2. 黑名单过滤
+                // 1. 黑名单过滤（若处于领主模式且属于广告弹窗）
                 if (isLordMode && isAdUri(uri)) {
                     return GeckoResult.fromValue(null);
                 }
-                
-                // 3. 频控保护
-                long currentTime = System.currentTimeMillis();
-                if (currentTime - lastPopupTime < 1000) { 
-                    lastPopupTime = currentTime;
-                    return GeckoResult.fromValue(null);
-                }
-                lastPopupTime = currentTime;
-                
-                // 允许新标签页
-                runOnUiThread(() -> {
-                    try {
-                        createNewTab(uri);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+
+                boolean isVerification = isVerificationUri(uri);
+
+                // 2. 频控保护（验证码及安全挑战弹窗不限制频控）
+                if (!isVerification) {
+                    long currentTime = System.currentTimeMillis();
+                    if (currentTime - lastPopupTime < 500) { 
+                        return GeckoResult.fromValue(null);
                     }
-                });
-                return GeckoResult.fromValue(null);
+                    lastPopupTime = currentTime;
+                }
+
+                // 3. 为新窗口创建真实的 GeckoSession，保持 window.opener 通信管道完整
+                TabInfo info = new TabInfo(null);
+                info.url = (uri != null && !uri.isEmpty()) ? uri : Config.URL_BLANK;
+                if (Config.URL_BLANK.equals(info.url)) {
+                    info.title = getString(R.string.title_new_tab);
+                }
+                tabs.add(info);
+                initializeSessionForTab(info);
+                if (tabSwitcherAdapter != null) {
+                    tabSwitcherAdapter.notifyItemInserted(tabs.size() - 1);
+                }
+                switchToTab(tabs.size() - 1);
+                updateBottomTabCounter();
+
+                return GeckoResult.fromValue(info.session);
             }
 
             private boolean isAdUri(String uri) {
-                if (uri == null || uri.isEmpty()) return true;
+                if (uri == null || uri.isEmpty()) return false;
+                // 绝不拦截人机验证与风控服务
+                if (isVerificationUri(uri)) {
+                    return false;
+                }
                 String lower = uri.toLowerCase();
-                return lower.contains("popads") || lower.contains("onclickads") || 
-                       lower.contains("onclickperformance") || lower.contains("clksite") || 
-                       lower.contains("cpm") || lower.contains("adsterra") || 
-                       lower.contains("doubleclick") || lower.contains("googleadservices") ||
-                       lower.contains("affiliate") || lower.contains("/ad/") || 
-                       lower.contains("clk") || lower.contains("redirect") ||
-                       lower.contains("track") || lower.contains("analytic") ||
-                       lower.contains("popcash") || lower.contains("exoclick");
+                try {
+                    android.net.Uri parsed = android.net.Uri.parse(uri);
+                    String host = parsed.getHost();
+                    if (host != null) {
+                        String lowerHost = host.toLowerCase();
+                        if (lowerHost.endsWith("popads.net") || lowerHost.contains("onclickads") || 
+                            lowerHost.contains("onclickperformance") || lowerHost.contains("clksite") || 
+                            lowerHost.contains("adsterra") || lowerHost.contains("doubleclick.net") || 
+                            lowerHost.contains("googleadservices.com") || lowerHost.contains("popcash.net") || 
+                            lowerHost.contains("exoclick.com") || lowerHost.contains("adservice.google") ||
+                            lowerHost.contains("pagead2.googlesyndication.com")) {
+                            return true;
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                return lower.contains("popads.") || lower.contains("onclickads") || 
+                       lower.contains("adsterra.") || lower.contains("doubleclick.net") || 
+                       lower.contains("googleadservices.com") || lower.contains("popcash.net") || 
+                       lower.contains("exoclick.com");
             }
 
             @Override
@@ -1333,6 +1396,11 @@ public class MainActivity extends AppCompatActivity {
                     @NonNull GeckoSession session,
                     @NonNull LoadRequest request) {
                 String uri = request.uri;
+
+                // 优先放行所有人机验证及安全挑战相关请求
+                if (isVerificationUri(uri)) {
+                    return GeckoResult.fromValue(AllowOrDeny.ALLOW);
+                }
 
                 // 检查是否是 .onion 域名
                 try {
